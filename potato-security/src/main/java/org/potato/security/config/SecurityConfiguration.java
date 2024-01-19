@@ -2,6 +2,7 @@ package org.potato.security.config;
 
 import org.potato.security.handler.AuthenticationFailureHandler;
 import org.potato.security.handler.AuthenticationSuccessHandler;
+import org.potato.security.handler.LoginSuccessHandler;
 import org.potato.security.handler.TokenHandler;
 import org.potato.security.provider.AuthenticationProvider;
 
@@ -19,6 +20,7 @@ public class SecurityConfiguration {
     private AuthenticationProvider authenticationProvider;
     private Map<String, String> authRules;
     private TokenHandler tokenHandler;
+    private LoginSuccessHandler loginSuccessHandler;
     private AuthenticationSuccessHandler authenticationSuccessHandler;
     private AuthenticationFailureHandler authenticationFailureHandler;
 
@@ -48,6 +50,14 @@ public class SecurityConfiguration {
 
     public void setTokenHandler(TokenHandler tokenHandler) {
         this.tokenHandler = tokenHandler;
+    }
+
+    public LoginSuccessHandler getLoginSuccessHandler() {
+        return loginSuccessHandler;
+    }
+
+    public void setLoginSuccessHandler(LoginSuccessHandler loginSuccessHandler) {
+        this.loginSuccessHandler = loginSuccessHandler;
     }
 
     public AuthenticationSuccessHandler getAuthenticationSuccessHandler() {

@@ -100,7 +100,7 @@ public class TokenUtils {
 	public static Result verify(String token) {
 
 		if (StringUtils.isNullOrEmpty(token)) {
-			return Result.failure().code(-1).message("token is not exist");
+			return Result.failure().code(-1).message("token is required");
 		}
 
     	try {
@@ -110,10 +110,8 @@ public class TokenUtils {
 			return Result.success().addPayload("claims", claims);
 		} catch (TokenExpiredException e) {
 			return Result.failure().code(-2).message("token is expired");
-		} catch (SignatureVerificationException e) {
-			return Result.failure().code(-3).message("token签名校验失败，比如secret有误");
 		} catch (JWTVerificationException e) {
-			return Result.failure().code(-4).message("其它校验异常");
+			return Result.failure().code(-3).message("token is invalid");
 		}
     }
 }

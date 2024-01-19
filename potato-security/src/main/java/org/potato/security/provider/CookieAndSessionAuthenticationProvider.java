@@ -37,7 +37,7 @@ public class CookieAndSessionAuthenticationProvider extends AuthenticationProvid
             authentication.setAuthResult(Result.success());
         } else {
             authentication.getRuntimeInstance().getLogInfo().put("auth-authc", "you have not been login");
-            authentication.setAuthResult(Result.failure().code(ResponseCode.AUTH_TOKEN_IS_NOT_EXIST).message("Sorry, you have not been login"));
+            authentication.setAuthResult(Result.failure().code(ResponseCode.AUTH_TOKEN_IS_REQUIRED).message("Sorry, you have not been login"));
         }
         return authentication;
     }

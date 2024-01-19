@@ -6,7 +6,7 @@ import org.potato.security.AuthUser;
  * AuthenticationService
  *
  * <p>
- *     class SysUserService impl AuthenticationService
+ *     class AuthenticationServiceImpl implements AuthenticationService
  * </p>
  *
  * <p>
@@ -17,6 +17,6 @@ public interface AuthenticationService {
 
     AuthUser findAuthUserByUsername(String username);
 
-    String[] findAuthUserRolesById(String id);
-    String[] findAuthUserPermsById(String id);
+    String[] findAuthUserRolesById(String authUserId);
+    String[] findAuthUserPermsById(String authUserId);
 }

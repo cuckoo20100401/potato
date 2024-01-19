@@ -43,29 +43,29 @@ public class AuthenticationController {
 	 * @return
 	 */
 	@PostMapping("/login")
-	public Result login(HttpServletRequest request, String username, String password) {
+	public Result login(String username, String password, String clientType, HttpServletRequest request) {
 
 		if (StringUtils.isNullOrEmpty(username)) {
-			return Result.failure().code(ResponseCode.LOGIN_USERNAME_IS_EMPTY).message("username cannot be empty");
+			return Result.failure().code(ResponseCode.LOGIN_USERNAME_IS_REQUIRED).message("帐号不能为空");
 		}
 		if (StringUtils.isNullOrEmpty(password)) {
-			return Result.failure().code(ResponseCode.LOGIN_PASSWORD_IS_EMPTY).message("password cannot be empty");
+			return Result.failure().code(ResponseCode.LOGIN_PASSWORD_IS_REQUIRED).message("密码不能为空");
 		}
 		
 		AuthUser authUser = authenticationService.findAuthUserByUsername(username);
 		if (authUser == null) {
-			return Result.failure().code(ResponseCode.LOGIN_USERNAME_IS_NOT_EXIST).message("the account does not exist");
+			return Result.failure().code(ResponseCode.LOGIN_USERNAME_IS_NOT_EXIST).message("帐号不存在");
 		}
 		if (!authUser.getPassword().equals(StringUtils.encryptByAES(password))) {
-			return Result.failure().code(ResponseCode.LOGIN_PASSWORD_IS_INCORRECT).message("the password is incorrect");
+			return Result.failure().code(ResponseCode.LOGIN_PASSWORD_IS_INCORRECT).message("密码错误");
 		}
-		if (authUser.getStatus() == -1) {
-			return Result.failure().code(ResponseCode.LOGIN_USERNAME_IS_DISABLED).message("the account is disabled");
+		if (authUser.getStatus() != null && authUser.getStatus() == -1) {
+			return Result.failure().code(ResponseCode.LOGIN_USERNAME_IS_DISABLED).message("帐号已被禁用");
 		}
 
+		authUser.setClientType(clientType);
 		authUser.setRoles(authenticationService.findAuthUserRolesById(authUser.getId()));
 		authUser.setPerms(authenticationService.findAuthUserPermsById(authUser.getId()));
-		authUser.setClientType(request.getParameter("clientType"));
 
 		Map<String, Object> authUserX = new LinkedHashMap<>();
 		authUserX.put("id", authUser.getId());
@@ -73,6 +73,7 @@ public class AuthenticationController {
 		authUserX.put("nickname", authUser.getNickname());
 		authUserX.put("roles", authUser.getRoles());
 		authUserX.put("perms", authUser.getPerms());
+		securityConfiguration.getLoginSuccessHandler().onLoginSuccess(authUser, authUserX);
 
 		String authenticationProviderName = securityConfiguration.getAuthenticationProvider().getClass().getSimpleName();
 		if (authenticationProviderName.equals("CookieAndSessionAuthenticationProvider")) {
@@ -108,10 +109,10 @@ public class AuthenticationController {
 
 			authUser = authenticationService.findAuthUserByUsername(authentication.getAuthUser().getUsername());
 			if (authUser == null) {
-				return Result.failure().code(ResponseCode.LOGIN_USERNAME_IS_NOT_EXIST).message("the account does not exist");
+				return Result.failure().code(ResponseCode.LOGIN_USERNAME_IS_NOT_EXIST).message("帐号不存在");
 			}
 			if (authUser.getStatus() == -1) {
-				return Result.failure().code(ResponseCode.LOGIN_USERNAME_IS_DISABLED).message("the account is disabled");
+				return Result.failure().code(ResponseCode.LOGIN_USERNAME_IS_DISABLED).message("帐号已被禁用");
 			}
 
 			authUser.setRoles(authenticationService.findAuthUserRolesById(authUser.getId()));

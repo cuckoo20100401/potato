@@ -5,9 +5,11 @@ import org.apache.logging.log4j.Logger;
 import org.potato.security.TokenUtils;
 import org.potato.security.handler.AuthenticationFailureHandler;
 import org.potato.security.handler.AuthenticationSuccessHandler;
+import org.potato.security.handler.LoginSuccessHandler;
 import org.potato.security.handler.TokenHandler;
 import org.potato.security.handler.impl.DefaultAuthenticationFailureHandler;
 import org.potato.security.handler.impl.DefaultAuthenticationSuccessHandler;
+import org.potato.security.handler.impl.DefaultLoginSuccessHandler;
 import org.potato.security.handler.impl.DefaultTokenHandler;
 import org.potato.security.provider.AuthenticationProvider;
 import org.springframework.core.io.ClassPathResource;
@@ -42,7 +44,6 @@ public class SecurityConfigurationBuilder {
         TokenUtils.secret = secret;
         return this;
     }
-
     public SecurityConfigurationBuilder setCreateTokenExpiredMinutes(long minutes) {
         TokenUtils.token_expired_minutes = minutes;
         return this;
@@ -74,6 +75,10 @@ public class SecurityConfigurationBuilder {
         securityConfiguration.setTokenHandler(tokenHandler);
         return this;
     }
+    public SecurityConfigurationBuilder addLoginSuccessHandler(LoginSuccessHandler loginSuccessHandler) {
+        securityConfiguration.setLoginSuccessHandler(loginSuccessHandler);
+        return this;
+    }
     public SecurityConfigurationBuilder addAuthenticationSuccessHandler(AuthenticationSuccessHandler authenticationSuccessHandler) {
         securityConfiguration.setAuthenticationSuccessHandler(authenticationSuccessHandler);
         return this;
@@ -93,6 +98,9 @@ public class SecurityConfigurationBuilder {
         //* 当项目未配置自定义的Handler时，框架会使用默认的Handler实现类。每个Handler都提供了一个默认实现类
         if (securityConfiguration.getTokenHandler() == null) {
             securityConfiguration.setTokenHandler(new DefaultTokenHandler());
+        }
+        if (securityConfiguration.getLoginSuccessHandler() == null) {
+            securityConfiguration.setLoginSuccessHandler(new DefaultLoginSuccessHandler());
         }
         if (securityConfiguration.getAuthenticationSuccessHandler() == null) {
             securityConfiguration.setAuthenticationSuccessHandler(new DefaultAuthenticationSuccessHandler());
