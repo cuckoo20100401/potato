@@ -51,6 +51,9 @@ public class AuthenticationController {
 		if (StringUtils.isNullOrEmpty(password)) {
 			return Result.failure().code(ResponseCode.LOGIN_PASSWORD_IS_REQUIRED).message("密码不能为空");
 		}
+		if (StringUtils.isNullOrEmpty(clientType)) {
+			return Result.failure().code(ResponseCode.LOGIN_CLIENTTYPE_IS_REQUIRED).message("客户端类型不能为空");
+		}
 		
 		AuthUser authUser = authenticationService.findAuthUserByUsername(username);
 		if (authUser == null) {

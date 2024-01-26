@@ -10,6 +10,7 @@ public interface ResponseCode {
     public static final int LOGIN_USERNAME_IS_DISABLED = -3;
     public static final int LOGIN_PASSWORD_IS_REQUIRED = -4;
     public static final int LOGIN_PASSWORD_IS_INCORRECT = -5;
+    public static final int LOGIN_CLIENTTYPE_IS_REQUIRED = -6;
 
     /**
      * auth code
