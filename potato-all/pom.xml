@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>org.potato</groupId>
+		<artifactId>potato</artifactId>
+		<version>1.0.0</version>
+	</parent>
+
+	<groupId>org.potato</groupId>
+	<artifactId>potato-all</artifactId>
+	<version>1.0.0</version>
+	<packaging>jar</packaging>
+	
+	<name>potato-all</name>
+	<description>potato-all</description>
+	<url>http://maven.apache.org</url>
+
+	<properties>
+		<java.version>11</java.version>
+	</properties>
+
+	<dependencies>
+		<dependency>
+			<groupId>org.potato</groupId>
+			<artifactId>potato-security</artifactId>
+			<version>1.0.0</version>
+		</dependency>
+		<dependency>
+			<groupId>org.potato</groupId>
+			<artifactId>potato-jdbc</artifactId>
+			<version>1.0.0</version>
+		</dependency>
+	</dependencies>
+</project>
+
+
+
