@@ -16,10 +16,10 @@ public interface TokenHandler {
     /**
      * 创建refresh_token
      *
-     * @param user
+     * @param authUser
      * @return
      */
-    String createRefreshToken(AuthUser user);
+    String createRefreshToken(AuthUser authUser);
 
     /**
      * 校验和解析token
