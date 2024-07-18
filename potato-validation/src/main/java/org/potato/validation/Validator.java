@@ -1,6 +1,6 @@
 package org.potato.validation;
 
-import org.potato.util.web.DTO;
+import org.potato.util.DTO;
 
 /**
  * Validator

@@ -1,7 +1,7 @@
 package org.potato.validation;
 
+import org.potato.util.DTO;
 import org.potato.util.Result;
-import org.potato.util.web.DTO;
 import org.potato.validation.rule.IntegerRule;
 import org.potato.validation.rule.StringRule;
 import org.springframework.web.bind.annotation.RequestBody;

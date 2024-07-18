@@ -20,7 +20,6 @@ universal utils.
 - IPUtils
 - MathUtils
 - Result
-- ResultEntity(Deprecated: Result is recommended)
 - StringUtils
 - ValidateUtils
 

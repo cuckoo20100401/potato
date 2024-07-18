@@ -14,7 +14,7 @@
 	<packaging>jar</packaging>
 	
 	<name>potato-all</name>
-	<description>potato-all</description>
+	<description>You just need to import this dependency for your project</description>
 	<url>http://maven.apache.org</url>
 
 	<properties>
@@ -22,6 +22,12 @@
 	</properties>
 
 	<dependencies>
+		<!-- All Potato -->
+		<dependency>
+			<groupId>org.potato</groupId>
+			<artifactId>potato-jdbc</artifactId>
+			<version>1.0.0</version>
+		</dependency>
 		<dependency>
 			<groupId>org.potato</groupId>
 			<artifactId>potato-security</artifactId>
@@ -29,7 +35,7 @@
 		</dependency>
 		<dependency>
 			<groupId>org.potato</groupId>
-			<artifactId>potato-jdbc</artifactId>
+			<artifactId>potato-validation</artifactId>
 			<version>1.0.0</version>
 		</dependency>
 	</dependencies>
