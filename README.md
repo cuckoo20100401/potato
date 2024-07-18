@@ -8,11 +8,21 @@ Contains universal functions for java web project.
 - Spring java web project.
 
 
+## Install
+```xml
+<dependency>
+    <groupId>org.potato</groupId>
+    <artifactId>potato-all</artifactId>
+    <version>1.0.0</version>
+</dependency>
+```
+
+
 ## Modules
 
 ### potato-util
 
-universal utils.
+Universal utils.
 
 - DTO
 - FileUtils
@@ -25,7 +35,7 @@ universal utils.
 
 ### potato-util-web
 
-universal web utils.
+Universal web utils.
 
 - PageInfo
 - RequestUtils
@@ -35,7 +45,7 @@ universal web utils.
 
 ### potato-util-db
 
-universal database utils.
+Universal database utils.
 
 - EntityTableTransformUtils
 - IDUtils
@@ -43,7 +53,7 @@ universal database utils.
 
 ### potato-security
 
-login, validate roles and permissions, for horizontal scaling of servers.
+Login, validate roles and permissions, for horizontal scaling of servers.
 
 #### Configuration
 1. 配置SpringBoot的启动文件
@@ -312,7 +322,7 @@ logging.level.org.potato.security = DEBUG
 
 ### potato-jdbc
 
-a sample data persistence tool.
+A sample data persistence tool.
 
 #### Example
 - Category.java
@@ -513,7 +523,7 @@ public class ElectronicBookServiceImpl {
 
 ### potato-validation
 
-validate parameters for API.
+Validate parameters for API.
 
 #### Example
 ```java
