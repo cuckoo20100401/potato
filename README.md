@@ -291,7 +291,7 @@ public class SecurityConfig {
 /core/my/salary/** = authc, roles[admin] or perms[my:salary:view,my:salary:add,my:salary:update,my:salary:delete]
 ```
 
-#### 开启日志
+#### Enable log
 - 当使用SpringBoot默认日志时，在application.properties中添加如下配置：
 ```properties
 logging.level.org.potato.security = DEBUG
@@ -303,7 +303,7 @@ logging.level.org.potato.security = DEBUG
 </Logger>
 ```
 
-#### 常见问题
+#### FAQ
 1. 解决过滤器顺序
    - 由于Security模块是使用Servlet过滤器实现的，当在项目中配置了别的过滤器，可能会排在框架中认证过滤器的前面，造成多个过滤器顺序的混乱，从而会引起项目业务功能错误。而使用@WebFilter注解的过滤器是通过文件名称排序的，所以在项目中可以通过继承框架中的认证过滤器并修改名称，让其与自己创建的过滤器融洽相处。另外也可以在安全配置中添加认证成功的处理器回调函数，在里面实现自定义过滤器的业务逻辑也行，就不用自己创建过滤器了。
 2. 解决跨域
