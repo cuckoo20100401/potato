@@ -68,10 +68,10 @@ import org.springframework.web.socket.config.annotation.EnableWebSocket;
 @ServletComponentScan(basePackages = {"org.potato.security"})
 @EnableScheduling
 @EnableWebSocket
-public class Mylife2023ServiceCoreApplication {
+public class CoreApplication {
 
    public static void main(String[] args) {
-      SpringApplication.run(Mylife2023ServiceCoreApplication.class, args);
+      SpringApplication.run(CoreApplication.class, args);
    }
 
 }
