@@ -53,7 +53,7 @@ Universal database utils.
 
 ### potato-security
 
-Login, validate roles and permissions, for horizontal scaling of servers.
+Authenticate and authorize, for horizontal scaling of servers.
 
 #### Configuration
 1. 配置SpringBoot的启动文件
