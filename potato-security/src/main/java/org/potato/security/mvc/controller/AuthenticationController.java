@@ -5,6 +5,7 @@ import org.apache.logging.log4j.Logger;
 import org.potato.security.AuthUser;
 import org.potato.security.Authentication;
 import org.potato.security.Constants;
+import org.potato.security.annotation.Anonymous;
 import org.potato.security.config.SecurityConfiguration;
 import org.potato.security.mvc.service.AuthenticationService;
 import org.potato.util.Result;
@@ -22,6 +23,7 @@ import java.util.Map;
  */
 @RestController
 @RequestMapping("/auth")
+@Anonymous
 @CrossOrigin
 public class AuthenticationController {
 
