@@ -34,5 +34,5 @@ public interface AuthenticationFailureHandler {
      * </p>
      * @param authentication
      */
-    void onAuthenticationFailure(Authentication authentication);
+    Object onAuthenticationFailure(Authentication authentication);
 }

@@ -59,6 +59,11 @@
                 <artifactId>spring-jdbc</artifactId>
                 <version>5.1.10.RELEASE</version>
             </dependency>
+            <dependency>
+                <groupId>org.springframework</groupId>
+                <artifactId>spring-aop</artifactId>
+                <version>5.1.10.RELEASE</version>
+            </dependency>
             <!-- Database Driver -->
             <dependency>
                 <groupId>org.postgresql</groupId>
@@ -110,6 +115,12 @@
                 <groupId>org.im4java</groupId>
                 <artifactId>im4java</artifactId>
                 <version>1.4.0</version>
+            </dependency>
+            <!-- AspectJ -->
+            <dependency>
+                <groupId>org.aspectj</groupId>
+                <artifactId>aspectjweaver</artifactId>
+                <version>1.9.7</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

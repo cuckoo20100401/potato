@@ -16,19 +16,10 @@ import java.util.Map;
  */
 public class Authentication {
 
-    private String authRule;
     private AuthUser authUser;
     private Result authResult;
-    private Boolean isAuthenticated;
+    private Boolean authenticated;
     private RuntimeInstance runtimeInstance;
-
-    public String getAuthRule() {
-        return authRule;
-    }
-
-    public void setAuthRule(String authRule) {
-        this.authRule = authRule;
-    }
 
     public AuthUser getAuthUser() {
         return authUser;
@@ -46,18 +37,12 @@ public class Authentication {
         this.authResult = authResult;
     }
 
-    public Boolean getAuthenticated() {
-        return isAuthenticated;
+    public Boolean isAuthenticated() {
+        return authenticated;
     }
 
-    public Authentication setAuthenticated(Boolean authenticated) {
-        this.authResult = null;
-        this.runtimeInstance.servletRequest = null;
-        this.runtimeInstance.servletResponse = null;
-        this.runtimeInstance.filterChain = null;
-        this.runtimeInstance.logInfo = null;
-        this.isAuthenticated = authenticated;
-        return this;
+    public void setAuthenticated(Boolean authenticated) {
+        this.authenticated = authenticated;
     }
 
     public RuntimeInstance getRuntimeInstance() {

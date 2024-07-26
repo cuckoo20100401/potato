@@ -1,9 +1,7 @@
 package org.potato.security.provider;
 
-import org.potato.security.AuthUtils;
 import org.potato.security.Authentication;
 import org.potato.security.config.SecurityConfiguration;
-import org.potato.util.Result;
 
 /**
  * AuthenticationProvider
@@ -29,45 +27,9 @@ public abstract class AuthenticationProvider {
     }
 
     /**
-     * 校验authc，由于不同的认证方式实现逻辑不一样，所以此方法由具体的认证提供者去实现
+     * 对当前请求进行安全检查，由于不同的认证方式实现逻辑不一样，所以此方法由具体的认证提供者去实现
      * @param authentication
      * @return
      */
-    public abstract Authentication validateAuthc(Authentication authentication);
-
-    /**
-     * 校验角色和权限，目前分4种情况，通过正则表达式去匹配
-     * @param authentication
-     * @return
-     */
-    public Authentication validateRolesAndPerms(Authentication authentication) {
-
-        String authRuleType = "auth-roles_and_perms";
-
-        Result authResult = AuthUtils.validateAuthRuleForRolesAndPerms(authentication.getAuthRule(), authentication.getAuthUser().getRoles(), authentication.getAuthUser().getPerms());
-        if (authResult.isNothing()) {
-            authRuleType = "auth-roles_or_perms";
-            authResult = AuthUtils.validateAuthRuleForRolesOrPerms(authentication.getAuthRule(), authentication.getAuthUser().getRoles(), authentication.getAuthUser().getPerms());
-        }
-        if (authResult.isNothing()) {
-            authRuleType = "auth-roles";
-            authResult = AuthUtils.validateAuthRuleForRoles(authentication.getAuthRule(), authentication.getAuthUser().getRoles(), authentication.getAuthUser().getPerms());
-        }
-        if (authResult.isNothing()) {
-            authRuleType = "auth-perms";
-            authResult = AuthUtils.validateAuthRuleForPerms(authentication.getAuthRule(), authentication.getAuthUser().getRoles(), authentication.getAuthUser().getPerms());
-        }
-
-        if (!authResult.isNothing()) {
-            if (authResult.isSuccess()) {
-                authentication.getRuntimeInstance().getLogInfo().put(authRuleType, "ok");
-            } else {
-                authentication.getRuntimeInstance().getLogInfo().put(authRuleType, authResult.message());
-            }
-            authentication.setAuthResult(authResult);
-        } else {
-            authentication.setAuthResult(Result.nothing().message("do nothing"));
-        }
-        return authentication;
-    }
+    public abstract Authentication check(Authentication authentication);
 }

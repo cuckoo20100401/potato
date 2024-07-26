@@ -15,8 +15,8 @@ public interface ResponseCode {
     /**
      * auth code
      */
-    public static final int AUTH_TOKEN_IS_REQUIRED = 401;
-    public static final int AUTH_TOKEN_IS_INVALID = 401;
-    public static final int AUTH_TOKEN_IS_EXPIRED = 401;
-    public static final int AUTH_TOKEN_IS_NO_PERMISSION = 401;
+    public static final int AUTH_TOKEN_IS_EMPTY = 490;
+    public static final int AUTH_TOKEN_IS_INVALID = 491;
+    public static final int AUTH_TOKEN_IS_EXPIRED = 492;
+    public static final int AUTH_TOKEN_IS_NO_PERMISSION = 493;
 }

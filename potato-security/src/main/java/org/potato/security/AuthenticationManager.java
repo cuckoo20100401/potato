@@ -6,7 +6,6 @@ import org.apache.logging.log4j.Logger;
 import org.potato.security.config.SecurityConfiguration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.util.AntPathMatcher;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -33,7 +32,7 @@ public class AuthenticationManager {
      * authenticate
      *
      * <p>
-     *     认证登录状态、角色和权限
+     *     通过check()方法对当前请求进行安全检查，领取到检查结果报告，然后在随后的 AuthenticationAspect 中通过 AOP 对结果报告进行具体的校验和请求拦截
      * </p>
      *
      * @param authentication
@@ -46,63 +45,17 @@ public class AuthenticationManager {
         HttpServletRequest request = (HttpServletRequest) authentication.getRuntimeInstance().getServletRequest();
 
         String currentRequestURI = request.getRequestURI();
-        authentication.getRuntimeInstance().getLogInfo().put("current-request-URI", currentRequestURI);
+        authentication.getRuntimeInstance().getLogInfo().put("request-URI", currentRequestURI);
         String contextPath = request.getContextPath();
         if (!contextPath.equals("/")) {
             currentRequestURI = currentRequestURI.replaceFirst(contextPath, "");
         }
 
         String currentRequestPath = currentRequestURI;
-        authentication.getRuntimeInstance().getLogInfo().put("current-request-path", currentRequestPath);
+        authentication.getRuntimeInstance().getLogInfo().put("request-path", currentRequestPath);
 
-        AntPathMatcher pathMatcher = new AntPathMatcher();
-        String matchedAuthPattern = securityConfiguration.getAuthRules().keySet().stream().filter(authPattern -> pathMatcher.match(authPattern, currentRequestPath)).findFirst().orElse(null);
-        authentication.getRuntimeInstance().getLogInfo().put("matched-auth-pattern", matchedAuthPattern);
-        if (matchedAuthPattern != null) {
-            //* obtain matched auth rule
-            String matchedAuthRule = securityConfiguration.getAuthRules().get(matchedAuthPattern);
-            authentication.getRuntimeInstance().getLogInfo().put("matched-auth-rule", matchedAuthRule);
-            authentication.setAuthRule(matchedAuthRule);
-            //* validate anon
-            if (matchedAuthRule.trim().equals("anon")) {
-                authentication.getRuntimeInstance().getLogInfo().put("auth-anon", "ok");
-                logger.debug(objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(authentication.getRuntimeInstance().getLogInfo()));
-                securityConfiguration.getAuthenticationSuccessHandler().onAuthenticationSuccess(authentication);
-                request.setAttribute(Constants.AUTHENTICATION, authentication);
-                authentication.getRuntimeInstance().getFilterChain().doFilter(authentication.getRuntimeInstance().getServletRequest(), authentication.getRuntimeInstance().getServletResponse());
-                return;
-            }
-            //* validate authc
-            if (matchedAuthRule.indexOf("authc") != -1) {
-                authentication = securityConfiguration.getAuthenticationProvider().validateAuthc(authentication);
-                if (authentication.getAuthResult().isSuccess()) {
-                    //continue run code of filter, eg:validate roles and perms
-                } else {
-                    logger.debug(objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(authentication.getRuntimeInstance().getLogInfo()));
-                    securityConfiguration.getAuthenticationFailureHandler().onAuthenticationFailure(authentication);
-                    return;
-                }
-            }
-            //* validate roles and perms
-            authentication = securityConfiguration.getAuthenticationProvider().validateRolesAndPerms(authentication);
-            if (!authentication.getAuthResult().isNothing()) {
-                logger.debug(objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(authentication.getRuntimeInstance().getLogInfo()));
-                if (authentication.getAuthResult().isSuccess()) {
-                    securityConfiguration.getAuthenticationSuccessHandler().onAuthenticationSuccess(authentication);
-                    request.setAttribute(Constants.AUTHENTICATION, authentication);
-                    authentication.getRuntimeInstance().getFilterChain().doFilter(authentication.getRuntimeInstance().getServletRequest(), authentication.getRuntimeInstance().getServletResponse());
-                } else {
-                    securityConfiguration.getAuthenticationFailureHandler().onAuthenticationFailure(authentication);
-                }
-                return;
-            }
-        }
-
-        //* will run the code: (1)when authRules has only authc and be passed,(2)when has not matched AuthPattern
-        logger.debug(objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(authentication.getRuntimeInstance().getLogInfo()));
-        securityConfiguration.getAuthenticationSuccessHandler().onAuthenticationSuccess(authentication);
+        authentication = securityConfiguration.getAuthenticationProvider().check(authentication);
         request.setAttribute(Constants.AUTHENTICATION, authentication);
         authentication.getRuntimeInstance().getFilterChain().doFilter(authentication.getRuntimeInstance().getServletRequest(), authentication.getRuntimeInstance().getServletResponse());
-        return;
     }
 }

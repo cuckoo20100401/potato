@@ -16,20 +16,22 @@ import javax.servlet.http.HttpServletRequest;
 public class TokenAuthenticationProvider extends AuthenticationProvider {
 
     @Override
-    public Authentication validateAuthc(Authentication authentication) {
+    public Authentication check(Authentication authentication) {
 
-        //* obtain token from header
+        //step obtain token from header
         HttpServletRequest request = (HttpServletRequest) authentication.getRuntimeInstance().getServletRequest();
         AuthUser authUser = new AuthUser();
         authUser.setAccessToken(request.getHeader(Constants.TOKEN));
         authentication.setAuthUser(authUser);
 
-        //* verify and parse token, or update token by method verifyToken. update token is optional
+        //step verify and parse token, or update token by method verifyToken. update token is optional
         authentication = securityConfiguration.getTokenHandler().verifyAndParseToken(authentication);
         if (authentication.getAuthResult().isSuccess()) {
-            authentication.getRuntimeInstance().getLogInfo().put("auth-authc", "ok");
+            authentication.setAuthenticated(true);
+            authentication.getRuntimeInstance().getLogInfo().put("check", "ok");
         } else {
-            authentication.getRuntimeInstance().getLogInfo().put("auth-authc", authentication.getAuthResult().message());
+            authentication.setAuthenticated(false);
+            authentication.getRuntimeInstance().getLogInfo().put("check", authentication.getAuthResult().message());
         }
         return authentication;
     }

@@ -51,7 +51,7 @@ public class DefaultTokenHandler implements TokenHandler {
             authentication.setAuthResult(Result.success());
         } else {
             if (result.code() == -1) {
-                authentication.setAuthResult(Result.failure().code(ResponseCode.AUTH_TOKEN_IS_REQUIRED).message("token is required"));
+                authentication.setAuthResult(Result.failure().code(ResponseCode.AUTH_TOKEN_IS_EMPTY).message("token is empty"));
             } else if (result.code() == -2) {
                 authentication.setAuthResult(Result.failure().code(ResponseCode.AUTH_TOKEN_IS_EXPIRED).message("token is expired"));
             } else {
@@ -74,7 +74,7 @@ public class DefaultTokenHandler implements TokenHandler {
             authentication.setAuthResult(Result.success());
         } else {
             if (result.code() == -1) {
-                authentication.setAuthResult(Result.failure().code(ResponseCode.AUTH_TOKEN_IS_REQUIRED).message("token is required"));
+                authentication.setAuthResult(Result.failure().code(ResponseCode.AUTH_TOKEN_IS_EMPTY).message("token is empty"));
             } else if (result.code() == -2) {
                 authentication.setAuthResult(Result.failure().code(ResponseCode.AUTH_TOKEN_IS_EXPIRED).message("token is expired"));
             } else {

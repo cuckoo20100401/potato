@@ -18,7 +18,7 @@ import javax.servlet.http.HttpServletRequest;
 public class CookieAndSessionAuthenticationProvider extends AuthenticationProvider {
 
     /**
-     * validateAuthc
+     * check
      *
      * <p>
      *     没登录时和token不存在用的是同一个状态码
@@ -28,16 +28,18 @@ public class CookieAndSessionAuthenticationProvider extends AuthenticationProvid
      * @return
      */
     @Override
-    public Authentication validateAuthc(Authentication authentication) {
+    public Authentication check(Authentication authentication) {
 
         HttpServletRequest request = (HttpServletRequest) authentication.getRuntimeInstance().getServletRequest();
         if (request.getSession().getAttribute(Constants.AUTH_USER) != null) {
-            authentication.getRuntimeInstance().getLogInfo().put("auth-authc", "ok");
+            authentication.setAuthenticated(true);
+            authentication.getRuntimeInstance().getLogInfo().put("check", "ok");
             authentication.setAuthUser((AuthUser)request.getSession().getAttribute(Constants.AUTH_USER));
             authentication.setAuthResult(Result.success());
         } else {
-            authentication.getRuntimeInstance().getLogInfo().put("auth-authc", "you have not been login");
-            authentication.setAuthResult(Result.failure().code(ResponseCode.AUTH_TOKEN_IS_REQUIRED).message("Sorry, you have not been login"));
+            authentication.setAuthenticated(false);
+            authentication.getRuntimeInstance().getLogInfo().put("check", "you have not been login");
+            authentication.setAuthResult(Result.failure().code(ResponseCode.AUTH_TOKEN_IS_EMPTY).message("you have not been login"));
         }
         return authentication;
     }

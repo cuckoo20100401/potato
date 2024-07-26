@@ -22,7 +22,7 @@ import java.util.Arrays;
 public class CookieAndTokenAuthenticationProvider extends AuthenticationProvider {
 
     @Override
-    public Authentication validateAuthc(Authentication authentication) {
+    public Authentication check(Authentication authentication) {
 
         //* obtain token from cookie
         String accessToken = null;
@@ -42,9 +42,11 @@ public class CookieAndTokenAuthenticationProvider extends AuthenticationProvider
         //* verify and parse token, or update token by method verifyToken. update token is optional
         authentication = securityConfiguration.getTokenHandler().verifyAndParseToken(authentication);
         if (authentication.getAuthResult().isSuccess()) {
-            authentication.getRuntimeInstance().getLogInfo().put("auth-authc", "ok");
+            authentication.setAuthenticated(true);
+            authentication.getRuntimeInstance().getLogInfo().put("check", "ok");
         } else {
-            authentication.getRuntimeInstance().getLogInfo().put("auth-authc", authentication.getAuthResult().message());
+            authentication.setAuthenticated(false);
+            authentication.getRuntimeInstance().getLogInfo().put("check", authentication.getAuthResult().message());
         }
         return authentication;
     }
