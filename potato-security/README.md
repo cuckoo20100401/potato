@@ -67,7 +67,8 @@ public class Example {
    @HasAnyRolesAndAllPerms(roles = {"role1", "role2"}, perms = {"perm1", "perm2"})
    @HasAnyRolesAndAnyPerms(roles = {"role1", "role2"}, perms = {"perm1", "perm2"})
    // 设计方案三（被采纳：实用的注解已被支持，其余不是很实用的放到未来支持）
-   @RequiresAuthentication                                 //supported
+   @Anonymous                                              //supported
+   @Authenticated                                          //supported
    @RequiresAuthorization //也就是下面所有情况
    @RequiresRole("role")                                   //supported
    @RequiresPerm("perm")                                   //supported

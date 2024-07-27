@@ -85,7 +85,7 @@ public class CoreApplication {
 
 }
 ```
-2. SecurityConfig.java
+2. 安全配置
    - 最简配置
 ```java
 package com.cuckoo.project.common.config;
@@ -109,8 +109,8 @@ public class SecurityConfig {
     public SecurityConfiguration securityConfiguration() {
         return SecurityConfiguration.builder()
                 .setAuthenticationProvider(new TokenAuthenticationProvider())
-                .addAuthenticationRuleFromProperties("security.properties")
-                .addAuthenticationRule("/**", "authc")
+                .setCreateTokenExpiredMinutes(60)
+                .enableGlobalAuthenticated(true)
                 .build();
     }
 
@@ -162,13 +162,14 @@ import java.io.IOException;
 /**
  * 安全配置
  *
- * <h2>定义安全配置（必须的）</h2>
+ * <p>定义安全配置（必须的）</p>
  * <ol>
  *     <li>设置认证提供者（必须的）</li>
- *     <li>添加认证规则（可选的；注：/auth/login和/auth/refreshToken在框架内部已经开放，不需要额外配置）</li>
+ *     <li>设置各种token属性（可选的）</li>
+ *     <li>启用全局认证（可选的）</li>
  *     <li>添加各种处理器（可选的）</li>
  * </ol>
- * <h2>定义认证服务（必须的）</h2>
+ * <p>定义认证服务（必须的）</p>
  */
 @Configuration
 public class SecurityConfig {
@@ -184,8 +185,7 @@ public class SecurityConfig {
                 .setAuthenticationProvider(new TokenAuthenticationProvider())
                 .setCreateTokenSecret("1234")
                 .setCreateTokenExpiredMinutes(60)
-                .addAuthenticationRuleFromProperties("security.properties")
-                .addAuthenticationRule("/**", "authc")
+                .enableGlobalAuthenticated(true)
                 .addTokenHandler(new TokenHandler() {
                     @Override
                     public String createToken(AuthUser authUser) {
@@ -287,17 +287,35 @@ public class SecurityConfig {
     }
 }
 ```
-   - security.properties（注：当配置内容有中文时，必须将idea的properties文件编码设置为UTF-8，否则框架获取到的值可能会是乱码、会导致鉴权错误）
-```properties
-# 静态资源
-/static/** = anon
-# 系统管理
-/core/sys/user/getList = authc, roles[admin] or perms[sys:user:view]
-/core/sys/user/add = authc, roles[admin] or perms[sys:user:add]
-/core/sys/user/update = authc, roles[admin] or perms[sys:user:update]
-/core/sys/user/delete = authc, roles[admin] or perms[sys:user:delete]
-# 我的管理
-/core/my/salary/** = authc, roles[admin] or perms[my:salary:view,my:salary:add,my:salary:update,my:salary:delete]
+3. 应用
+   - 如果启用了全局认证，可以省略@Authenticated注解
+   - RequiresXX开头的注解只能配置一个
+   - 方法级别的注解优先级大于类级别
+   - @Anonymous注解的优先级最高，只要添加了匿名注解，认证时会忽略其它所有注解（如果类中某个方法需要匿名访问，可以仅给该方法加匿名注解即可）
+```java
+package com.cuckoo.project.core.controller;
+
+@RestController
+@RequestMapping("/core/sys/user")
+@Anonymous                                                    //表示访问整个Controller是匿名的，不做任何检验
+@Authenticated                                                //表示访问整个Controller是需要认证的，即必须登录
+@RequiresRole("admin")                                        //表示访问整个Controller需要admin角色
+@RequiresPerm("sys:user:view")                                //表示访问整个Controller需要sys:user:view权限
+@RequiresRoleOrPerm(role = "admin", perm = "sys:user:view")   //表示访问整个Controller需要admin角色或sys:user:view权限
+@RequiresRoleAndPerm(role = "admin", perm = "sys:user:view")  //表示访问整个Controller需要admin角色和sys:user:view权限
+public class SysUserController {
+
+    @GetMapping("/getList")
+    @Anonymous                                                    //表示访问这个方法是匿名的，不做任何检验
+    @Authenticated                                                //表示访问这个方法是需要认证的，即必须登录
+    @RequiresRole("admin")                                        //表示访问这个方法需要admin角色
+    @RequiresPerm("sys:user:view")                                //表示访问这个方法需要sys:user:view权限
+    @RequiresRoleOrPerm(role = "admin", perm = "sys:user:view")   //表示访问这个方法需要admin角色或sys:user:view权限
+    @RequiresRoleAndPerm(role = "admin", perm = "sys:user:view")  //表示访问这个方法需要admin角色和sys:user:view权限
+    public Result getList() {
+        return sysUserService.findList(sysUser, pageNum, pageSize);
+    }
+}
 ```
 
 #### Enable log
@@ -313,9 +331,7 @@ logging.level.org.potato.security = DEBUG
 ```
 
 #### FAQ
-1. 解决过滤器顺序
-   - 由于Security模块是使用Servlet过滤器实现的，当在项目中配置了别的过滤器，可能会排在框架中认证过滤器的前面，造成多个过滤器顺序的混乱，从而会引起项目业务功能错误。而使用@WebFilter注解的过滤器是通过文件名称排序的，所以在项目中可以通过继承框架中的认证过滤器并修改名称，让其与自己创建的过滤器融洽相处。另外也可以在安全配置中添加认证成功的处理器回调函数，在里面实现自定义过滤器的业务逻辑也行，就不用自己创建过滤器了。
-2. 解决跨域
+1. 解决跨域
    - 使用SpringBoot的跨域配置
    - Controller中使用@CrossOrigin注解
    - 使用nginx的跨域配置
