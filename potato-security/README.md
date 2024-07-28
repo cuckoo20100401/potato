@@ -4,11 +4,16 @@ Authenticate and authorize, for horizontal scaling of servers.
 
 
 ## Design description
-
+### 第一版：
 - 第一步，AuthenticationFilter像服务网关一样会拦截所有客户端请求，当拦截到一个请求时，认证过滤器会将当前的请求信息封装成Authentication对象传递给AuthenticationManager去认证
 - 第二步，AuthenticationManager获取匹配的认证规则，比如anon、authc、roles and perms
 - 第三步，AuthenticationManager会调用SecurityConfiguration中配置的认证提供者依次去认证anon、authc、roles and perms，当认证失败时会调用提前配置的AuthenticationFailureHandler方法，当认证成功时会调用AuthenticationSuccessHandler方法，并且将Authentication对象设置到request属性中供后面的Controller中使用，然后会继续往下走，比如authc认证完成后会往下走继续去认证roles and perms。另外在认证时传给认证提供者的也是Authentication对象，认证提供者认证完成后返回的也是Authentication对象，因为Authentication对象中不但包含了认证结果，还有其它有用的信息
-- 注：SecurityContextHolder提供了在项目代码中任何地方都能获取到Authentication对象的能力，Authentication对象中就包含了当前的登录用户AuthUser对象
+### 第二版（实现注解功能后）：
+- 第一步，AuthenticationFilter像服务网关一样会拦截所有客户端请求，当拦截到一个请求时，认证过滤器会将当前的请求信息封装成Authentication对象传递给AuthenticationManager去认证
+- 第二步，AuthenticationManager会调用SecurityConfiguration中配置的认证提供者的check()方法进行检查，然后领取到一张检查结果报告随身携带着。需要注意的是此处仅仅只是检查，拿到检查结果报告而已，比如校验和解析token，并不做权限的判断和拦截
+- 第三步，AuthenticationAspect会根据是否启用全局认证、以及添加的权限控制注解，对上一步获取的检查结果报告进行具体的权限判断和请求拦截。相应的在校验成功或校验失败时会触发AuthenticationSuccessHandler和AuthenticationFailureHandler中的回调方法
+### 注：
+SecurityContextHolder提供了在项目代码中任何地方都能获取到Authentication对象的能力，Authentication对象中就包含了当前的登录用户AuthUser对象
 
 
 ## Auth rule expression of url
@@ -33,11 +38,6 @@ Authenticate and authorize, for horizontal scaling of servers.
 ## Permission control annotations
 实用的注解已被支持，其余不是很实用的放到未来支持。
 ```java
-package org.potato.security;
-
-import java.util.LinkedHashMap;
-import java.util.Map;
-
 public class Example {
 
    // 设计方案一
@@ -86,8 +86,8 @@ public class Example {
    @RequiresAllRolesAndAnyPerms(roles = {"role1", "role2"}, perms = {"perm1", "perm2"})
    @RequiresAnyRolesAndAllPerms(roles = {"role1", "role2"}, perms = {"perm1", "perm2"})
    @RequiresAnyRolesAndAnyPerms(roles = {"role1", "role2"}, perms = {"perm1", "perm2"})
-   public void getList() {
-      System.out.println("Hello World!");
+   public Object getList() {
+      return "Hello World!";
    }
 }
 ```
