@@ -1,6 +1,6 @@
 package org.potato.util.web;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 
 public class VisitorUtils {
 	
@@ -9,7 +9,7 @@ public class VisitorUtils {
 	 * @param request
 	 * @return
 	 */
-	public static String getVisitURL(HttpServletRequest  request){
+	public static String getVisitURL(HttpServletRequest request){
 		
 		StringBuffer visitURL = request.getRequestURL();
 		

@@ -1,11 +1,11 @@
 package org.potato.security.provider;
 
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
 import org.potato.security.AuthUser;
 import org.potato.security.Authentication;
 import org.potato.security.Constants;
 
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
 import java.util.Arrays;
 
 /**

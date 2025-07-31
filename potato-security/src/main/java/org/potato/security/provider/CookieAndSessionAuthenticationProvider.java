@@ -1,12 +1,11 @@
 package org.potato.security.provider;
 
+import jakarta.servlet.http.HttpServletRequest;
 import org.potato.security.AuthUser;
 import org.potato.security.Authentication;
 import org.potato.security.Constants;
 import org.potato.util.Result;
 import org.potato.util.web.ResponseCode;
-
-import javax.servlet.http.HttpServletRequest;
 
 /**
  * CookieAndSessionAuthenticationProvider

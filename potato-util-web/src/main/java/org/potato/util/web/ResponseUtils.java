@@ -1,8 +1,8 @@
 package org.potato.util.web;
 
-import java.io.IOException;
+import jakarta.servlet.http.HttpServletResponse;
 
-import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 
 public class ResponseUtils {
 	

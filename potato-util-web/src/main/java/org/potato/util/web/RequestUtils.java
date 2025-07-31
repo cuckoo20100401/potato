@@ -1,9 +1,9 @@
 package org.potato.util.web;
 
+import jakarta.servlet.http.HttpServletRequest;
+
 import java.util.HashMap;
 import java.util.Map;
-
-import javax.servlet.http.HttpServletRequest;
 
 public class RequestUtils {
 	
