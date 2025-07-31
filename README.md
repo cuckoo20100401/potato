@@ -233,7 +233,7 @@ public class SecurityConfig {
                         authUserX.put("extraAttribute1", "value1");
                         authUserX.put("extraAttribute2", "value2");
                         // save authUserSessionStatus to redis and set the expiration time
-                        String redisKey = Constant.Core.Redis.keyPrefix.authUser + authUser.getUsername();
+                        String redisKey = Constant.Redis.keyPrefix.authUser + authUser.getUsername();
                         Map<String, Object> redisValue = new LinkedHashMap<>();
                         redisValue.put("authUserId", authUser.getId());
                         redisValue.put("loginTime", LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
