@@ -74,11 +74,11 @@ public class DefaultTokenHandler implements TokenHandler {
             authentication.setAuthResult(Result.success());
         } else {
             if (result.code() == -1) {
-                authentication.setAuthResult(Result.failure().code(ResponseCode.AUTH_TOKEN_IS_EMPTY).message("token is empty"));
+                authentication.setAuthResult(Result.failure().code(-1).message("refreshToken is empty"));
             } else if (result.code() == -2) {
-                authentication.setAuthResult(Result.failure().code(ResponseCode.AUTH_TOKEN_IS_EXPIRED).message("token is expired"));
+                authentication.setAuthResult(Result.failure().code(-2).message("refreshToken is expired"));
             } else {
-                authentication.setAuthResult(Result.failure().code(ResponseCode.AUTH_TOKEN_IS_INVALID).message("token is invalid"));
+                authentication.setAuthResult(Result.failure().code(-3).message("refreshToken is invalid"));
             }
         }
         return authentication;

@@ -8,6 +8,8 @@ import org.potato.security.Authentication;
 import org.potato.security.Constants;
 import org.potato.security.annotation.Anonymous;
 import org.potato.security.config.SecurityConfiguration;
+import org.potato.security.mvc.entity.AuthUser4Login;
+import org.potato.security.mvc.entity.RefreshToken;
 import org.potato.security.mvc.service.AuthenticationService;
 import org.potato.util.Result;
 import org.potato.util.StringUtils;
@@ -38,37 +40,34 @@ public class AuthenticationController {
 	 * login
 	 *
 	 * <p>
-	 *     会同时返回token和refresh_token，若客户端对refresh_token没需求可以不关注，也不影响什么
+	 *     会同时返回token和refreshToken，若客户端对refresh_token没需求可以不关注，也不影响什么
 	 * </p>
-	 * @param username
-	 * @param password
-	 * @return
 	 */
-	@PostMapping("/login")
-	public Result login(String username, String password, String clientType, HttpServletRequest request) {
+	@PostMapping({"/getToken", "/login"})
+	public Result login(@RequestBody AuthUser4Login authUser4Login, HttpServletRequest request) {
 
-		if (StringUtils.isNullOrEmpty(username)) {
+		if (StringUtils.isNullOrEmpty(authUser4Login.getUsername())) {
 			return Result.failure().code(ResponseCode.LOGIN_USERNAME_IS_REQUIRED).message("帐号不能为空");
 		}
-		if (StringUtils.isNullOrEmpty(password)) {
+		if (StringUtils.isNullOrEmpty(authUser4Login.getPassword())) {
 			return Result.failure().code(ResponseCode.LOGIN_PASSWORD_IS_REQUIRED).message("密码不能为空");
 		}
-		if (StringUtils.isNullOrEmpty(clientType)) {
+		if (StringUtils.isNullOrEmpty(authUser4Login.getClientType())) {
 			return Result.failure().code(ResponseCode.LOGIN_CLIENTTYPE_IS_REQUIRED).message("客户端类型不能为空");
 		}
 		
-		AuthUser authUser = authenticationService.findAuthUserByUsername(username);
+		AuthUser authUser = authenticationService.findAuthUserByUsername(authUser4Login.getUsername());
 		if (authUser == null) {
 			return Result.failure().code(ResponseCode.LOGIN_USERNAME_IS_NOT_EXIST).message("帐号不存在");
 		}
-		if (!authUser.getPassword().equals(StringUtils.encryptByAES(password))) {
+		if (!authUser.getPassword().equals(StringUtils.encryptByAES(authUser4Login.getPassword()))) {
 			return Result.failure().code(ResponseCode.LOGIN_PASSWORD_IS_INCORRECT).message("密码错误");
 		}
 		if (authUser.getStatus() != null && authUser.getStatus() == -1) {
 			return Result.failure().code(ResponseCode.LOGIN_USERNAME_IS_DISABLED).message("帐号已被禁用");
 		}
 
-		authUser.setClientType(clientType);
+		authUser.setClientType(authUser4Login.getClientType());
 		authUser.setRoles(authenticationService.findAuthUserRolesById(authUser.getId()));
 		authUser.setPerms(authenticationService.findAuthUserPermsById(authUser.getId()));
 
@@ -96,15 +95,12 @@ public class AuthenticationController {
 
 	/**
 	 * refreshToken
-	 *
-	 * @param refreshToken
-	 * @return
 	 */
 	@PostMapping("/refreshToken")
-	public Result refreshToken(String refreshToken) {
+	public Result refreshToken(@RequestBody RefreshToken refreshToken) {
 
 		AuthUser authUser = new AuthUser();
-		authUser.setRefreshToken(refreshToken);
+		authUser.setRefreshToken(refreshToken.getRefreshToken());
 		Authentication authentication = new Authentication();
 		authentication.setAuthUser(authUser);
 
