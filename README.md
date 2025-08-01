@@ -13,7 +13,7 @@ Contains universal functions for java web project.
 <dependency>
     <groupId>org.potato</groupId>
     <artifactId>potato-all</artifactId>
-    <version>1.0.0</version>
+    <version>2.0.0</version>
 </dependency>
 ```
 
@@ -186,6 +186,7 @@ public class SecurityConfig {
                 .setCreateTokenSecret("1234")
                 .setCreateTokenExpiredMinutes(60)
                 .enableGlobalAuthenticated(true)
+                .enableRefreshToken(true)
                 .addTokenHandler(new TokenHandler() {
                     @Override
                     public String createToken(AuthUser authUser) {

@@ -13,6 +13,7 @@ public class SecurityConfiguration {
 
     private AuthenticationProvider authenticationProvider;
     private Boolean enableGlobalAuthenticated;
+    private Boolean enableRefreshToken;
     private TokenHandler tokenHandler;
     private LoginSuccessHandler loginSuccessHandler;
     private AuthenticationSuccessHandler authenticationSuccessHandler;
@@ -36,6 +37,14 @@ public class SecurityConfiguration {
 
     public void setEnableGlobalAuthenticated(Boolean enableGlobalAuthenticated) {
         this.enableGlobalAuthenticated = enableGlobalAuthenticated;
+    }
+
+    public Boolean getEnableRefreshToken() {
+        return enableRefreshToken;
+    }
+
+    public void setEnableRefreshToken(Boolean enableRefreshToken) {
+        this.enableRefreshToken = enableRefreshToken;
     }
 
     public TokenHandler getTokenHandler() {

@@ -85,7 +85,9 @@ public class AuthenticationController {
 			return Result.success().addPayload("authUser", authUserX);
 		} else if (authenticationProviderName.equals("CookieAndTokenAuthenticationProvider") || authenticationProviderName.equals("TokenAuthenticationProvider")) {
 			authUserX.put("token", securityConfiguration.getTokenHandler().createToken(authUser));
-			authUserX.put("refreshToken", securityConfiguration.getTokenHandler().createRefreshToken(authUser));
+			if (securityConfiguration.getEnableRefreshToken()) {
+				authUserX.put("refreshToken", securityConfiguration.getTokenHandler().createRefreshToken(authUser));
+			}
 			return Result.success().addPayload("authUser", authUserX);
 		} else {
 			logger.error("configuration error, there is no such authentication provider["+authenticationProviderName+"]");

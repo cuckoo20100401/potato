@@ -41,6 +41,11 @@ public class SecurityConfigurationBuilder {
         return this;
     }
 
+    public SecurityConfigurationBuilder enableRefreshToken(boolean enableRefreshToken) {
+        securityConfiguration.setEnableRefreshToken(enableRefreshToken);
+        return this;
+    }
+
     public SecurityConfigurationBuilder addTokenHandler(TokenHandler tokenHandler) {
         securityConfiguration.setTokenHandler(tokenHandler);
         return this;
@@ -64,12 +69,17 @@ public class SecurityConfigurationBuilder {
      */
     public SecurityConfiguration build() {
 
-        //* 当项目未配置时，默认不启用全局认证
+        // 当项目未配置时，默认不启用全局认证
         if (securityConfiguration.getEnableGlobalAuthenticated() == null) {
             securityConfiguration.setEnableGlobalAuthenticated(false);
         }
 
-        //* 当项目未配置自定义的Handler时，框架会使用默认的Handler实现类。每个Handler都提供了一个默认实现类
+        // 当项目未配置时，默认不启用RefreshToken
+        if (securityConfiguration.getEnableRefreshToken() == null) {
+            securityConfiguration.setEnableRefreshToken(false);
+        }
+
+        // 当项目未配置自定义的Handler时，框架会使用默认的Handler实现类。每个Handler都提供了一个默认实现类
         if (securityConfiguration.getTokenHandler() == null) {
             securityConfiguration.setTokenHandler(new DefaultTokenHandler());
         }
@@ -83,7 +93,7 @@ public class SecurityConfigurationBuilder {
             securityConfiguration.setAuthenticationFailureHandler(new DefaultAuthenticationFailureHandler());
         }
 
-        //* AuthenticationProvider中需要获取SecurityConfiguration中的配置信息，故需要此设置，其它类需要配置信息时也是如此
+        // AuthenticationProvider中需要获取SecurityConfiguration中的配置信息，故需要此设置，其它类需要配置信息时也是如此
         securityConfiguration.getAuthenticationProvider().setSecurityConfiguration(securityConfiguration);
 
         logger.info("build completed, enableGlobalAuthenticated is {}", securityConfiguration.getEnableGlobalAuthenticated());
