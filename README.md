@@ -167,6 +167,7 @@ import java.io.IOException;
  *     <li>设置认证提供者（必须的）</li>
  *     <li>设置各种token属性（可选的）</li>
  *     <li>启用全局认证（可选的）</li>
+ *     <li>启用刷新Token（可选的）</li>
  *     <li>添加各种处理器（可选的）</li>
  * </ol>
  * <p>定义认证服务（必须的）</p>
@@ -264,6 +265,12 @@ public class SecurityConfig {
                         }
                     }
                 })
+                .addLogHandler(new LogHandler() {
+                   @Override
+                   public void onLog(Map<String, String> log) {
+                      logger.info(log);
+                   }
+                })
                 .build();
     }
 
@@ -330,6 +337,7 @@ logging.level.org.potato.security = DEBUG
     <AppenderRef ref="Console"/>
 </Logger>
 ```
+- 注：当配置了LogHandler时，需要自行处理日志，可以打印或保存日志。上述配置只在没配置LogHandler时才生效。
 
 #### FAQ
 1. 解决跨域

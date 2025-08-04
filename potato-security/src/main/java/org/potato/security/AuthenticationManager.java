@@ -45,7 +45,7 @@ public class AuthenticationManager {
         HttpServletRequest request = (HttpServletRequest) authentication.getRuntimeInstance().getServletRequest();
 
         String currentRequestURI = request.getRequestURI();
-        authentication.getRuntimeInstance().getLogInfo().put("request-URI", currentRequestURI);
+        authentication.getRuntimeInstance().getLogInfo().put("request-uri", currentRequestURI);
         String contextPath = request.getContextPath();
         if (!contextPath.equals("/")) {
             currentRequestURI = currentRequestURI.replaceFirst(contextPath, "");

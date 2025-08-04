@@ -1,9 +1,6 @@
 package org.potato.security.config;
 
-import org.potato.security.handler.AuthenticationFailureHandler;
-import org.potato.security.handler.AuthenticationSuccessHandler;
-import org.potato.security.handler.LoginSuccessHandler;
-import org.potato.security.handler.TokenHandler;
+import org.potato.security.handler.*;
 import org.potato.security.provider.AuthenticationProvider;
 
 /**
@@ -18,6 +15,7 @@ public class SecurityConfiguration {
     private LoginSuccessHandler loginSuccessHandler;
     private AuthenticationSuccessHandler authenticationSuccessHandler;
     private AuthenticationFailureHandler authenticationFailureHandler;
+    private LogHandler logHandler;
 
     public static SecurityConfigurationBuilder builder() {
         return new SecurityConfigurationBuilder();
@@ -77,5 +75,13 @@ public class SecurityConfiguration {
 
     public void setAuthenticationFailureHandler(AuthenticationFailureHandler authenticationFailureHandler) {
         this.authenticationFailureHandler = authenticationFailureHandler;
+    }
+
+    public LogHandler getLogHandler() {
+        return logHandler;
+    }
+
+    public void setLogHandler(LogHandler logHandler) {
+        this.logHandler = logHandler;
     }
 }

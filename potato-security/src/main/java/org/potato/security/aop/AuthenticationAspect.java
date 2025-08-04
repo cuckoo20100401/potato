@@ -1,8 +1,5 @@
 package org.potato.security.aop;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
@@ -31,7 +28,6 @@ import java.util.Arrays;
 @Component
 public class AuthenticationAspect {
 
-    private static final Logger logger = LogManager.getLogger(AuthenticationAspect.class);
     private static final Class[] annotations = {
             Anonymous.class,
             Authenticated.class,
@@ -43,8 +39,6 @@ public class AuthenticationAspect {
 
     @Autowired
     private SecurityConfiguration securityConfiguration;
-    @Autowired
-    private ObjectMapper objectMapper;
 
     /**
      * Anonymous
@@ -259,6 +253,6 @@ public class AuthenticationAspect {
         return authentication;
     }
     public void printLog(Authentication authentication) throws Throwable {
-        logger.debug(objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(authentication.getRuntimeInstance().getLogInfo()));
+        securityConfiguration.getLogHandler().onLog(authentication.getRuntimeInstance().getLogInfo());
     }
 }

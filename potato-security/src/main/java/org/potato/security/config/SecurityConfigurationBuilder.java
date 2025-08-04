@@ -3,14 +3,8 @@ package org.potato.security.config;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.potato.security.TokenUtils;
-import org.potato.security.handler.AuthenticationFailureHandler;
-import org.potato.security.handler.AuthenticationSuccessHandler;
-import org.potato.security.handler.LoginSuccessHandler;
-import org.potato.security.handler.TokenHandler;
-import org.potato.security.handler.impl.DefaultAuthenticationFailureHandler;
-import org.potato.security.handler.impl.DefaultAuthenticationSuccessHandler;
-import org.potato.security.handler.impl.DefaultLoginSuccessHandler;
-import org.potato.security.handler.impl.DefaultTokenHandler;
+import org.potato.security.handler.*;
+import org.potato.security.handler.impl.*;
 import org.potato.security.provider.AuthenticationProvider;
 
 /**
@@ -62,6 +56,10 @@ public class SecurityConfigurationBuilder {
         securityConfiguration.setAuthenticationFailureHandler(authenticationFailureHandler);
         return this;
     }
+    public SecurityConfigurationBuilder addLogHandler(LogHandler logHandler) {
+        securityConfiguration.setLogHandler(logHandler);
+        return this;
+    }
 
     /**
      * 当调用该方法时可以校验和补全默认的配置信息
@@ -91,6 +89,9 @@ public class SecurityConfigurationBuilder {
         }
         if (securityConfiguration.getAuthenticationFailureHandler() == null) {
             securityConfiguration.setAuthenticationFailureHandler(new DefaultAuthenticationFailureHandler());
+        }
+        if (securityConfiguration.getLogHandler() == null) {
+            securityConfiguration.setLogHandler(new DefaultLogHandler());
         }
 
         // AuthenticationProvider中需要获取SecurityConfiguration中的配置信息，故需要此设置，其它类需要配置信息时也是如此
