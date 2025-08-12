@@ -5,12 +5,12 @@
 	<parent>
 		<groupId>org.potato</groupId>
 		<artifactId>potato</artifactId>
-		<version>2.0.0</version>
+		<version>3.0.0</version>
 	</parent>
 
 	<groupId>org.potato</groupId>
 	<artifactId>potato-all</artifactId>
-	<version>2.0.0</version>
+	<version>3.0.0</version>
 	<packaging>jar</packaging>
 	
 	<name>potato-all</name>
@@ -26,17 +26,17 @@
 		<dependency>
 			<groupId>org.potato</groupId>
 			<artifactId>potato-jdbc</artifactId>
-			<version>2.0.0</version>
+			<version>3.0.0</version>
 		</dependency>
 		<dependency>
 			<groupId>org.potato</groupId>
 			<artifactId>potato-security</artifactId>
-			<version>2.0.0</version>
+			<version>3.0.0</version>
 		</dependency>
 		<dependency>
 			<groupId>org.potato</groupId>
 			<artifactId>potato-validation</artifactId>
-			<version>2.0.0</version>
+			<version>3.0.0</version>
 		</dependency>
 	</dependencies>
 </project>

@@ -6,7 +6,7 @@ package org.potato.all;
  * <dependency>
  *     <groupId>org.potato</groupId>
  *     <artifactId>potato-all</artifactId>
- *     <version>2.0.0</version>
+ *     <version>3.0.0</version>
  * </dependency>
  */
 public class All {
