@@ -37,7 +37,7 @@ public class CookieAndTokenAuthenticationProvider extends AuthenticationProvider
         //* set token to Authentication.AuthUser
         SecurityUser securityUser = new SecurityUser();
         securityUser.setAccessToken(accessToken);
-        securityInfo.setAuthUser(securityUser);
+        securityInfo.setSecurityUser(securityUser);
 
         //* verify and parse token, or update token by method verifyToken. update token is optional
         securityInfo = securityConfiguration.getTokenHandler().verifyAndParseToken(securityInfo);

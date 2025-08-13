@@ -15,8 +15,8 @@ import org.potato.security.SecurityUser;
  */
 public interface AuthenticationService {
 
-    SecurityUser findAuthUserByUsername(String username);
+    SecurityUser getAuthUserByUsername(String username);
 
-    String[] findAuthUserRolesById(String authUserId);
-    String[] findAuthUserPermsById(String authUserId);
+    String[] getAuthUserRolesById(String authUserId);
+    String[] getAuthUserPermsById(String authUserId);
 }

@@ -32,11 +32,11 @@ public class DefaultTokenHandler implements TokenHandler {
     @Override
     public SecurityInfo verifyAndParseToken(SecurityInfo securityInfo) {
 
-        Result result = TokenUtils.verify(securityInfo.getAuthUser().getAccessToken());
+        Result result = TokenUtils.verify(securityInfo.getSecurityUser().getAccessToken());
 
         if (result.isSuccess()) {
             Map<String, Claim> accessTokenClaims = result.getPayload("claims");
-            SecurityUser securityUser = securityInfo.getAuthUser();
+            SecurityUser securityUser = securityInfo.getSecurityUser();
             securityUser.setId(accessTokenClaims.get("user.id") == null ? null : accessTokenClaims.get("user.id").asString());
             securityUser.setUsername(accessTokenClaims.get("user.username") == null ? null : accessTokenClaims.get("user.username").asString());
             securityUser.setNickname(accessTokenClaims.get("user.nickname") == null ? null : accessTokenClaims.get("user.nickname").asString());
@@ -64,11 +64,11 @@ public class DefaultTokenHandler implements TokenHandler {
     @Override
     public SecurityInfo verifyAndParseRefreshToken(SecurityInfo securityInfo) {
 
-        Result result = TokenUtils.verify(securityInfo.getAuthUser().getRefreshToken());
+        Result result = TokenUtils.verify(securityInfo.getSecurityUser().getRefreshToken());
 
         if (result.isSuccess()) {
             Map<String, Claim> accessTokenClaims = result.getPayload("claims");
-            SecurityUser securityUser = securityInfo.getAuthUser();
+            SecurityUser securityUser = securityInfo.getSecurityUser();
             securityUser.setId(accessTokenClaims.get("user.id") == null ? null : accessTokenClaims.get("user.id").asString());
             securityUser.setUsername(accessTokenClaims.get("user.username") == null ? null : accessTokenClaims.get("user.username").asString());
             securityInfo.setValidateResult(Result.success());

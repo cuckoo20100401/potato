@@ -21,11 +21,11 @@ public class SecurityInfo {
     private Boolean authenticated;
     private RuntimeInstance runtimeInstance;
 
-    public SecurityUser getAuthUser() {
+    public SecurityUser getSecurityUser() {
         return securityUser;
     }
 
-    public void setAuthUser(SecurityUser securityUser) {
+    public void setSecurityUser(SecurityUser securityUser) {
         this.securityUser = securityUser;
     }
 

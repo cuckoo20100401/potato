@@ -1,12 +1,12 @@
 package org.potato.security.mvc.entity;
 
-public class AuthenticationUser {
+public class AuthUser {
 
     private String username;
     private String password;
 
     /**
-     * web,android,apple,wxapp,smartdoc|smartdoc
+     * web,android,apple,wxapp,smartdoc
      */
     private String clientType;
 

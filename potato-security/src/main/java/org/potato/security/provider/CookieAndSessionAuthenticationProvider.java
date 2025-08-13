@@ -33,7 +33,7 @@ public class CookieAndSessionAuthenticationProvider extends AuthenticationProvid
         if (request.getSession().getAttribute(Constants.SECURITY_USER) != null) {
             securityInfo.setAuthenticated(true);
             securityInfo.getRuntimeInstance().getLogInfo().put("check", "ok");
-            securityInfo.setAuthUser((SecurityUser)request.getSession().getAttribute(Constants.SECURITY_USER));
+            securityInfo.setSecurityUser((SecurityUser)request.getSession().getAttribute(Constants.SECURITY_USER));
             securityInfo.setValidateResult(Result.success());
         } else {
             securityInfo.setAuthenticated(false);

@@ -21,7 +21,7 @@ public class TokenAuthenticationProvider extends AuthenticationProvider {
         HttpServletRequest request = (HttpServletRequest) securityInfo.getRuntimeInstance().getServletRequest();
         SecurityUser securityUser = new SecurityUser();
         securityUser.setAccessToken(request.getHeader(Constants.TOKEN));
-        securityInfo.setAuthUser(securityUser);
+        securityInfo.setSecurityUser(securityUser);
 
         //step verify and parse token, or update token by method verifyToken. update token is optional
         securityInfo = securityConfiguration.getTokenHandler().verifyAndParseToken(securityInfo);
