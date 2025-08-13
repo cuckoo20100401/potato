@@ -19,7 +19,7 @@ public abstract class AuthenticationProvider {
     protected SecurityConfiguration securityConfiguration;
 
     /**
-     * 在SecurityConfigurationBuilder.build()中装配上面的securityConfiguration变量
+     * 在 SecurityConfigurationBuilder.build() 中装配上面的 securityConfiguration 变量
      * @param securityConfiguration
      */
     public void setSecurityConfiguration(SecurityConfiguration securityConfiguration) {

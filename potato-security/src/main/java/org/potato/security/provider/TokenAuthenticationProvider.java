@@ -9,7 +9,7 @@ import org.potato.security.Constants;
  * TokenAuthenticationProvider
  *
  * <p>
- *     仅需要实现非通用的方法
+ *     此处仅需要实现非通用的方法，通用的方法由抽象类（即父类）去实现
  * </p>
  */
 public class TokenAuthenticationProvider extends AuthenticationProvider {
@@ -17,13 +17,13 @@ public class TokenAuthenticationProvider extends AuthenticationProvider {
     @Override
     public SecurityInfo check(SecurityInfo securityInfo) {
 
-        //step obtain token from header
+        // Obtain token from header
         HttpServletRequest request = (HttpServletRequest) securityInfo.getRuntimeInstance().getServletRequest();
         SecurityUser securityUser = new SecurityUser();
         securityUser.setAccessToken(request.getHeader(Constants.TOKEN));
         securityInfo.setSecurityUser(securityUser);
 
-        //step verify and parse token, or update token by method verifyToken. update token is optional
+        // Verify and parse token
         securityInfo = securityConfiguration.getTokenHandler().verifyAndParseToken(securityInfo);
         if (securityInfo.getValidateResult().isSuccess()) {
             securityInfo.setAuthenticated(true);
