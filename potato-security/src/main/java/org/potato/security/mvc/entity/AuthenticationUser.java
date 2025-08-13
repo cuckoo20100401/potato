@@ -1,6 +1,6 @@
 package org.potato.security.mvc.entity;
 
-public class AuthUser4Login {
+public class AuthenticationUser {
 
     private String username;
     private String password;

@@ -1,8 +1,8 @@
 package org.potato.security.provider;
 
 import jakarta.servlet.http.HttpServletRequest;
-import org.potato.security.AuthUser;
-import org.potato.security.Authentication;
+import org.potato.security.SecurityUser;
+import org.potato.security.SecurityInfo;
 import org.potato.security.Constants;
 
 /**
@@ -15,23 +15,23 @@ import org.potato.security.Constants;
 public class TokenAuthenticationProvider extends AuthenticationProvider {
 
     @Override
-    public Authentication check(Authentication authentication) {
+    public SecurityInfo check(SecurityInfo securityInfo) {
 
         //step obtain token from header
-        HttpServletRequest request = (HttpServletRequest) authentication.getRuntimeInstance().getServletRequest();
-        AuthUser authUser = new AuthUser();
-        authUser.setAccessToken(request.getHeader(Constants.TOKEN));
-        authentication.setAuthUser(authUser);
+        HttpServletRequest request = (HttpServletRequest) securityInfo.getRuntimeInstance().getServletRequest();
+        SecurityUser securityUser = new SecurityUser();
+        securityUser.setAccessToken(request.getHeader(Constants.TOKEN));
+        securityInfo.setAuthUser(securityUser);
 
         //step verify and parse token, or update token by method verifyToken. update token is optional
-        authentication = securityConfiguration.getTokenHandler().verifyAndParseToken(authentication);
-        if (authentication.getAuthResult().isSuccess()) {
-            authentication.setAuthenticated(true);
-            authentication.getRuntimeInstance().getLogInfo().put("check", "ok");
+        securityInfo = securityConfiguration.getTokenHandler().verifyAndParseToken(securityInfo);
+        if (securityInfo.getValidateResult().isSuccess()) {
+            securityInfo.setAuthenticated(true);
+            securityInfo.getRuntimeInstance().getLogInfo().put("check", "ok");
         } else {
-            authentication.setAuthenticated(false);
-            authentication.getRuntimeInstance().getLogInfo().put("check", authentication.getAuthResult().message());
+            securityInfo.setAuthenticated(false);
+            securityInfo.getRuntimeInstance().getLogInfo().put("check", securityInfo.getValidateResult().message());
         }
-        return authentication;
+        return securityInfo;
     }
 }

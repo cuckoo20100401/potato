@@ -2,8 +2,8 @@ package org.potato.security.provider;
 
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
-import org.potato.security.AuthUser;
-import org.potato.security.Authentication;
+import org.potato.security.SecurityUser;
+import org.potato.security.SecurityInfo;
 import org.potato.security.Constants;
 
 import java.util.Arrays;
@@ -22,11 +22,11 @@ import java.util.Arrays;
 public class CookieAndTokenAuthenticationProvider extends AuthenticationProvider {
 
     @Override
-    public Authentication check(Authentication authentication) {
+    public SecurityInfo check(SecurityInfo securityInfo) {
 
         //* obtain token from cookie
         String accessToken = null;
-        HttpServletRequest request = (HttpServletRequest) authentication.getRuntimeInstance().getServletRequest();
+        HttpServletRequest request = (HttpServletRequest) securityInfo.getRuntimeInstance().getServletRequest();
         if (request.getCookies() != null) {
             Cookie accessTokenCookie = Arrays.asList(request.getCookies()).stream().filter(cookie -> cookie.getName().equals(Constants.TOKEN)).findFirst().orElse(null);
             if (accessTokenCookie != null) {
@@ -35,19 +35,19 @@ public class CookieAndTokenAuthenticationProvider extends AuthenticationProvider
         }
 
         //* set token to Authentication.AuthUser
-        AuthUser authUser = new AuthUser();
-        authUser.setAccessToken(accessToken);
-        authentication.setAuthUser(authUser);
+        SecurityUser securityUser = new SecurityUser();
+        securityUser.setAccessToken(accessToken);
+        securityInfo.setAuthUser(securityUser);
 
         //* verify and parse token, or update token by method verifyToken. update token is optional
-        authentication = securityConfiguration.getTokenHandler().verifyAndParseToken(authentication);
-        if (authentication.getAuthResult().isSuccess()) {
-            authentication.setAuthenticated(true);
-            authentication.getRuntimeInstance().getLogInfo().put("check", "ok");
+        securityInfo = securityConfiguration.getTokenHandler().verifyAndParseToken(securityInfo);
+        if (securityInfo.getValidateResult().isSuccess()) {
+            securityInfo.setAuthenticated(true);
+            securityInfo.getRuntimeInstance().getLogInfo().put("check", "ok");
         } else {
-            authentication.setAuthenticated(false);
-            authentication.getRuntimeInstance().getLogInfo().put("check", authentication.getAuthResult().message());
+            securityInfo.setAuthenticated(false);
+            securityInfo.getRuntimeInstance().getLogInfo().put("check", securityInfo.getValidateResult().message());
         }
-        return authentication;
+        return securityInfo;
     }
 }

@@ -1,6 +1,6 @@
 package org.potato.security.mvc.service;
 
-import org.potato.security.AuthUser;
+import org.potato.security.SecurityUser;
 
 /**
  * AuthenticationService
@@ -15,7 +15,7 @@ import org.potato.security.AuthUser;
  */
 public interface AuthenticationService {
 
-    AuthUser findAuthUserByUsername(String username);
+    SecurityUser findAuthUserByUsername(String username);
 
     String[] findAuthUserRolesById(String authUserId);
     String[] findAuthUserPermsById(String authUserId);

@@ -9,12 +9,12 @@ import org.potato.security.provider.AuthenticationProvider;
 public class SecurityConfiguration {
 
     private AuthenticationProvider authenticationProvider;
-    private Boolean enableGlobalAuthenticated;
+    private Boolean enableGlobalSecurity;
     private Boolean enableRefreshToken;
     private TokenHandler tokenHandler;
     private LoginSuccessHandler loginSuccessHandler;
-    private AuthenticationSuccessHandler authenticationSuccessHandler;
-    private AuthenticationFailureHandler authenticationFailureHandler;
+    private ValidationSuccessHandler validationSuccessHandler;
+    private ValidationFailureHandler validationFailureHandler;
     private LogHandler logHandler;
 
     public static SecurityConfigurationBuilder builder() {
@@ -29,12 +29,12 @@ public class SecurityConfiguration {
         this.authenticationProvider = authenticationProvider;
     }
 
-    public Boolean getEnableGlobalAuthenticated() {
-        return enableGlobalAuthenticated;
+    public Boolean getEnableGlobalSecurity() {
+        return enableGlobalSecurity;
     }
 
-    public void setEnableGlobalAuthenticated(Boolean enableGlobalAuthenticated) {
-        this.enableGlobalAuthenticated = enableGlobalAuthenticated;
+    public void setEnableGlobalSecurity(Boolean enableGlobalSecurity) {
+        this.enableGlobalSecurity = enableGlobalSecurity;
     }
 
     public Boolean getEnableRefreshToken() {
@@ -61,20 +61,20 @@ public class SecurityConfiguration {
         this.loginSuccessHandler = loginSuccessHandler;
     }
 
-    public AuthenticationSuccessHandler getAuthenticationSuccessHandler() {
-        return authenticationSuccessHandler;
+    public ValidationSuccessHandler getValidationSuccessHandler() {
+        return validationSuccessHandler;
     }
 
-    public void setAuthenticationSuccessHandler(AuthenticationSuccessHandler authenticationSuccessHandler) {
-        this.authenticationSuccessHandler = authenticationSuccessHandler;
+    public void setValidationSuccessHandler(ValidationSuccessHandler validationSuccessHandler) {
+        this.validationSuccessHandler = validationSuccessHandler;
     }
 
-    public AuthenticationFailureHandler getAuthenticationFailureHandler() {
-        return authenticationFailureHandler;
+    public ValidationFailureHandler getValidationFailureHandler() {
+        return validationFailureHandler;
     }
 
-    public void setAuthenticationFailureHandler(AuthenticationFailureHandler authenticationFailureHandler) {
-        this.authenticationFailureHandler = authenticationFailureHandler;
+    public void setValidationFailureHandler(ValidationFailureHandler validationFailureHandler) {
+        this.validationFailureHandler = validationFailureHandler;
     }
 
     public LogHandler getLogHandler() {

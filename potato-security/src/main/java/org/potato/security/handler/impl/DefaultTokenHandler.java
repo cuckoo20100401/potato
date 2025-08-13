@@ -1,8 +1,8 @@
 package org.potato.security.handler.impl;
 
 import com.auth0.jwt.interfaces.Claim;
-import org.potato.security.AuthUser;
-import org.potato.security.Authentication;
+import org.potato.security.SecurityUser;
+import org.potato.security.SecurityInfo;
 import org.potato.security.TokenUtils;
 import org.potato.security.handler.TokenHandler;
 import org.potato.util.Result;
@@ -20,67 +20,67 @@ import java.util.Map;
 public class DefaultTokenHandler implements TokenHandler {
 
     @Override
-    public String createToken(AuthUser authUser) {
-        return TokenUtils.createToken(authUser);
+    public String createToken(SecurityUser securityUser) {
+        return TokenUtils.createToken(securityUser);
     }
 
     @Override
-    public String createRefreshToken(AuthUser authUser) {
-        return TokenUtils.createRefreshToken(authUser);
+    public String createRefreshToken(SecurityUser securityUser) {
+        return TokenUtils.createRefreshToken(securityUser);
     }
 
     @Override
-    public Authentication verifyAndParseToken(Authentication authentication) {
+    public SecurityInfo verifyAndParseToken(SecurityInfo securityInfo) {
 
-        Result result = TokenUtils.verify(authentication.getAuthUser().getAccessToken());
+        Result result = TokenUtils.verify(securityInfo.getAuthUser().getAccessToken());
 
         if (result.isSuccess()) {
             Map<String, Claim> accessTokenClaims = result.getPayload("claims");
-            AuthUser authUser = authentication.getAuthUser();
-            authUser.setId(accessTokenClaims.get("user.id") == null ? null : accessTokenClaims.get("user.id").asString());
-            authUser.setUsername(accessTokenClaims.get("user.username") == null ? null : accessTokenClaims.get("user.username").asString());
-            authUser.setNickname(accessTokenClaims.get("user.nickname") == null ? null : accessTokenClaims.get("user.nickname").asString());
-            authUser.setCellphone(accessTokenClaims.get("user.cellphone") == null ? null : accessTokenClaims.get("user.cellphone").asString());
-            authUser.setTelephone(accessTokenClaims.get("user.telephone") == null ? null : accessTokenClaims.get("user.telephone").asString());
-            authUser.setEmail(accessTokenClaims.get("user.email") == null ? null : accessTokenClaims.get("user.email").asString());
-            authUser.setCompanyId(accessTokenClaims.get("user.companyId") == null ? null : accessTokenClaims.get("user.companyId").asString());
-            authUser.setManageGroupIds(accessTokenClaims.get("user.manageGroupIds") == null ? null : accessTokenClaims.get("user.departmentId").asArray(String.class));
-            authUser.setClientType(accessTokenClaims.get("user.clientType") == null ? null : accessTokenClaims.get("user.clientType").asString());
-            authUser.setRoles(accessTokenClaims.get("user.roles").asArray(String.class));
-            authUser.setPerms(accessTokenClaims.get("user.perms").asArray(String.class));
-            authentication.setAuthResult(Result.success());
+            SecurityUser securityUser = securityInfo.getAuthUser();
+            securityUser.setId(accessTokenClaims.get("user.id") == null ? null : accessTokenClaims.get("user.id").asString());
+            securityUser.setUsername(accessTokenClaims.get("user.username") == null ? null : accessTokenClaims.get("user.username").asString());
+            securityUser.setNickname(accessTokenClaims.get("user.nickname") == null ? null : accessTokenClaims.get("user.nickname").asString());
+            securityUser.setCellphone(accessTokenClaims.get("user.cellphone") == null ? null : accessTokenClaims.get("user.cellphone").asString());
+            securityUser.setTelephone(accessTokenClaims.get("user.telephone") == null ? null : accessTokenClaims.get("user.telephone").asString());
+            securityUser.setEmail(accessTokenClaims.get("user.email") == null ? null : accessTokenClaims.get("user.email").asString());
+            securityUser.setCompanyId(accessTokenClaims.get("user.companyId") == null ? null : accessTokenClaims.get("user.companyId").asString());
+            securityUser.setManageGroupIds(accessTokenClaims.get("user.manageGroupIds") == null ? null : accessTokenClaims.get("user.departmentId").asArray(String.class));
+            securityUser.setClientType(accessTokenClaims.get("user.clientType") == null ? null : accessTokenClaims.get("user.clientType").asString());
+            securityUser.setRoles(accessTokenClaims.get("user.roles").asArray(String.class));
+            securityUser.setPerms(accessTokenClaims.get("user.perms").asArray(String.class));
+            securityInfo.setValidateResult(Result.success());
         } else {
             if (result.code() == -1) {
-                authentication.setAuthResult(Result.failure().code(ResponseCode.AUTH_TOKEN_IS_EMPTY).message("token is empty"));
+                securityInfo.setValidateResult(Result.failure().code(ResponseCode.AUTH_TOKEN_IS_EMPTY).message("token is empty"));
             } else if (result.code() == -2) {
-                authentication.setAuthResult(Result.failure().code(ResponseCode.AUTH_TOKEN_IS_EXPIRED).message("token is expired"));
+                securityInfo.setValidateResult(Result.failure().code(ResponseCode.AUTH_TOKEN_IS_EXPIRED).message("token is expired"));
             } else {
-                authentication.setAuthResult(Result.failure().code(ResponseCode.AUTH_TOKEN_IS_INVALID).message("token is invalid"));
+                securityInfo.setValidateResult(Result.failure().code(ResponseCode.AUTH_TOKEN_IS_INVALID).message("token is invalid"));
             }
         }
-        return authentication;
+        return securityInfo;
     }
 
     @Override
-    public Authentication verifyAndParseRefreshToken(Authentication authentication) {
+    public SecurityInfo verifyAndParseRefreshToken(SecurityInfo securityInfo) {
 
-        Result result = TokenUtils.verify(authentication.getAuthUser().getRefreshToken());
+        Result result = TokenUtils.verify(securityInfo.getAuthUser().getRefreshToken());
 
         if (result.isSuccess()) {
             Map<String, Claim> accessTokenClaims = result.getPayload("claims");
-            AuthUser authUser = authentication.getAuthUser();
-            authUser.setId(accessTokenClaims.get("user.id") == null ? null : accessTokenClaims.get("user.id").asString());
-            authUser.setUsername(accessTokenClaims.get("user.username") == null ? null : accessTokenClaims.get("user.username").asString());
-            authentication.setAuthResult(Result.success());
+            SecurityUser securityUser = securityInfo.getAuthUser();
+            securityUser.setId(accessTokenClaims.get("user.id") == null ? null : accessTokenClaims.get("user.id").asString());
+            securityUser.setUsername(accessTokenClaims.get("user.username") == null ? null : accessTokenClaims.get("user.username").asString());
+            securityInfo.setValidateResult(Result.success());
         } else {
             if (result.code() == -1) {
-                authentication.setAuthResult(Result.failure().code(-1).message("refreshToken is empty"));
+                securityInfo.setValidateResult(Result.failure().code(-1).message("refreshToken is empty"));
             } else if (result.code() == -2) {
-                authentication.setAuthResult(Result.failure().code(-2).message("refreshToken is expired"));
+                securityInfo.setValidateResult(Result.failure().code(-2).message("refreshToken is expired"));
             } else {
-                authentication.setAuthResult(Result.failure().code(-3).message("refreshToken is invalid"));
+                securityInfo.setValidateResult(Result.failure().code(-3).message("refreshToken is invalid"));
             }
         }
-        return authentication;
+        return securityInfo;
     }
 }

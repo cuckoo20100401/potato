@@ -1,6 +1,6 @@
 package org.potato.security.provider;
 
-import org.potato.security.Authentication;
+import org.potato.security.SecurityInfo;
 import org.potato.security.config.SecurityConfiguration;
 
 /**
@@ -28,8 +28,8 @@ public abstract class AuthenticationProvider {
 
     /**
      * 对当前请求进行安全检查，由于不同的认证方式实现逻辑不一样，所以此方法由具体的认证提供者去实现
-     * @param authentication
+     * @param securityInfo
      * @return
      */
-    public abstract Authentication check(Authentication authentication);
+    public abstract SecurityInfo check(SecurityInfo securityInfo);
 }

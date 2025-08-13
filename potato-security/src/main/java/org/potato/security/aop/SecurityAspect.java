@@ -4,9 +4,9 @@ import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.reflect.MethodSignature;
-import org.potato.security.Authentication;
+import org.potato.security.SecurityInfo;
 import org.potato.security.Constants;
-import org.potato.security.SecurityContextHolder;
+import org.potato.security.SecurityUtils;
 import org.potato.security.annotation.RequiresPerms;
 import org.potato.security.annotation.RequiresRoles;
 import org.potato.security.annotation.Security;
@@ -36,7 +36,7 @@ public class SecurityAspect {
     @Around("@within(org.springframework.stereotype.Controller) || @within(org.springframework.web.bind.annotation.RestController)")
     public Object validateGlobalSecurity(ProceedingJoinPoint joinPoint) throws Throwable {
 
-        if (!securityConfiguration.getEnableGlobalAuthenticated()) {
+        if (!securityConfiguration.getEnableGlobalSecurity()) {
             return joinPoint.proceed();
         }
 
@@ -46,14 +46,14 @@ public class SecurityAspect {
             return joinPoint.proceed();
         }
 
-        Authentication authentication = SecurityContextHolder.getAuthentication();
-        if (authentication.isAuthenticated()) {
-            authentication = this.setValidateResultAndPrintLog("validateGlobalSecurity", Result.success());
-            securityConfiguration.getAuthenticationSuccessHandler().onAuthenticationSuccess(authentication);
+        SecurityInfo securityInfo = SecurityUtils.getSecurityInfo();
+        if (securityInfo.isAuthenticated()) {
+            securityInfo = this.setValidateResultAndPrintLog("validateGlobalSecurity", Result.success());
+            securityConfiguration.getValidationSuccessHandler().onValidationSuccess(securityInfo);
             return joinPoint.proceed();
         } else {
-            authentication = this.setValidateResultAndPrintLog("validateGlobalSecurity", authentication.getAuthResult());
-            return securityConfiguration.getAuthenticationFailureHandler().onAuthenticationFailure(authentication);
+            securityInfo = this.setValidateResultAndPrintLog("validateGlobalSecurity", securityInfo.getValidateResult());
+            return securityConfiguration.getValidationFailureHandler().onValidationFailure(securityInfo);
         }
     }
 
@@ -76,7 +76,7 @@ public class SecurityAspect {
 
     private Object validateSecurityAnnotation(ProceedingJoinPoint joinPoint, Security securityAnnotation) throws Throwable {
 
-        Authentication authentication = SecurityContextHolder.getAuthentication();
+        SecurityInfo securityInfo = SecurityUtils.getSecurityInfo();
 
         //Validate Anonymous
         if (securityAnnotation.anonymous()) {
@@ -85,11 +85,11 @@ public class SecurityAspect {
         }
 
         //Validate Authentication
-        if (authentication.isAuthenticated()) {
-            authentication = this.setValidateResult("validateAuthentication", Result.success());
+        if (securityInfo.isAuthenticated()) {
+            securityInfo = this.setValidateResult("validateAuthentication", Result.success());
         } else {
-            authentication = this.setValidateResultAndPrintLog("validateAuthentication", authentication.getAuthResult());
-            return securityConfiguration.getAuthenticationFailureHandler().onAuthenticationFailure(authentication);
+            securityInfo = this.setValidateResultAndPrintLog("validateAuthentication", securityInfo.getValidateResult());
+            return securityConfiguration.getValidationFailureHandler().onValidationFailure(securityInfo);
         }
 
         //Validate Authorization:roles
@@ -98,7 +98,7 @@ public class SecurityAspect {
         if (requiresRolesAnnotation.value().length > 0) {
             int hasRoleCount = 0;
             for (String requiresRole: requiresRolesAnnotation.value()) {
-                if (Arrays.stream(authentication.getAuthUser().getRoles()).toList().contains(requiresRole)) {
+                if (Arrays.stream(securityInfo.getAuthUser().getRoles()).toList().contains(requiresRole)) {
                     hasRoleCount++;
                 }
             }
@@ -117,10 +117,10 @@ public class SecurityAspect {
                 }
             }
             if (validateRequiresRolesResult) {
-                authentication = this.setValidateResult("validateAuthorization[role-"+requiresRolesAnnotation.logical().value()+"-role]", Result.success());
+                securityInfo = this.setValidateResult("validateAuthorization[role-"+requiresRolesAnnotation.logical().value()+"-role]", Result.success());
             } else {
-                authentication = this.setValidateResultAndPrintLog("validateAuthorization[role-"+requiresRolesAnnotation.logical().value()+"-role]", Result.failure().code(ResponseCode.AUTH_TOKEN_IS_NO_PERMISSION).message("no permission"));
-                return securityConfiguration.getAuthenticationFailureHandler().onAuthenticationFailure(authentication);
+                securityInfo = this.setValidateResultAndPrintLog("validateAuthorization[role-"+requiresRolesAnnotation.logical().value()+"-role]", Result.failure().code(ResponseCode.AUTH_TOKEN_IS_NO_PERMISSION).message("no permission"));
+                return securityConfiguration.getValidationFailureHandler().onValidationFailure(securityInfo);
             }
         }
 
@@ -130,7 +130,7 @@ public class SecurityAspect {
         if (requiresPermsAnnotation.value().length > 0) {
             int hasPermCount = 0;
             for (String requiresPerm: requiresPermsAnnotation.value()) {
-                if (Arrays.stream(authentication.getAuthUser().getPerms()).toList().contains(requiresPerm)) {
+                if (Arrays.stream(securityInfo.getAuthUser().getPerms()).toList().contains(requiresPerm)) {
                     hasPermCount++;
                 }
             }
@@ -149,10 +149,10 @@ public class SecurityAspect {
                 }
             }
             if (validateRequiresPermsResult) {
-                authentication = this.setValidateResult("validateAuthorization[perm-"+requiresPermsAnnotation.logical().value()+"-perm]", Result.success());
+                securityInfo = this.setValidateResult("validateAuthorization[perm-"+requiresPermsAnnotation.logical().value()+"-perm]", Result.success());
             } else {
-                authentication = this.setValidateResultAndPrintLog("validateAuthorization[perm-"+requiresPermsAnnotation.logical().value()+"-perm]", Result.failure().code(ResponseCode.AUTH_TOKEN_IS_NO_PERMISSION).message("no permission"));
-                return securityConfiguration.getAuthenticationFailureHandler().onAuthenticationFailure(authentication);
+                securityInfo = this.setValidateResultAndPrintLog("validateAuthorization[perm-"+requiresPermsAnnotation.logical().value()+"-perm]", Result.failure().code(ResponseCode.AUTH_TOKEN_IS_NO_PERMISSION).message("no permission"));
+                return securityConfiguration.getValidationFailureHandler().onValidationFailure(securityInfo);
             }
         }
 
@@ -160,41 +160,41 @@ public class SecurityAspect {
         if (requiresRolesAnnotation.value().length > 0 && requiresPermsAnnotation.value().length > 0) {
             if (securityAnnotation.logical().value().equals(Logical.AND.value())) {
                 if (validateRequiresRolesResult && validateRequiresPermsResult) {
-                    authentication = this.setValidateResult("validateAuthorization[role-"+securityAnnotation.logical().value()+"-perm]", Result.success());
+                    securityInfo = this.setValidateResult("validateAuthorization[role-"+securityAnnotation.logical().value()+"-perm]", Result.success());
                 } else {
-                    authentication = this.setValidateResultAndPrintLog("validateAuthorization[role-"+securityAnnotation.logical().value()+"-perm]", Result.failure().code(ResponseCode.AUTH_TOKEN_IS_NO_PERMISSION).message("no permission"));
-                    return securityConfiguration.getAuthenticationFailureHandler().onAuthenticationFailure(authentication);
+                    securityInfo = this.setValidateResultAndPrintLog("validateAuthorization[role-"+securityAnnotation.logical().value()+"-perm]", Result.failure().code(ResponseCode.AUTH_TOKEN_IS_NO_PERMISSION).message("no permission"));
+                    return securityConfiguration.getValidationFailureHandler().onValidationFailure(securityInfo);
                 }
             }
             if (securityAnnotation.logical().value().equals(Logical.OR.value())) {
                 if (validateRequiresRolesResult || validateRequiresPermsResult) {
-                    authentication = this.setValidateResult("validateAuthorization[role-"+securityAnnotation.logical().value()+"-perm]", Result.success());
+                    securityInfo = this.setValidateResult("validateAuthorization[role-"+securityAnnotation.logical().value()+"-perm]", Result.success());
                 } else {
-                    authentication = this.setValidateResultAndPrintLog("validateAuthorization[role-"+securityAnnotation.logical().value()+"-perm]", Result.failure().code(ResponseCode.AUTH_TOKEN_IS_NO_PERMISSION).message("no permission"));
-                    return securityConfiguration.getAuthenticationFailureHandler().onAuthenticationFailure(authentication);
+                    securityInfo = this.setValidateResultAndPrintLog("validateAuthorization[role-"+securityAnnotation.logical().value()+"-perm]", Result.failure().code(ResponseCode.AUTH_TOKEN_IS_NO_PERMISSION).message("no permission"));
+                    return securityConfiguration.getValidationFailureHandler().onValidationFailure(securityInfo);
                 }
             }
         }
 
         //Passed and allow access resources
-        this.printLog(authentication);
-        securityConfiguration.getAuthenticationSuccessHandler().onAuthenticationSuccess(authentication);
+        this.printLog(securityInfo);
+        securityConfiguration.getValidationSuccessHandler().onValidationSuccess(securityInfo);
         return joinPoint.proceed();
     }
 
-    private Authentication setValidateResult(String authLabel, Result authResult) {
-        Authentication authentication = SecurityContextHolder.getAuthentication();
-        authentication.setAuthResult(authResult);
-        authentication.getRuntimeInstance().getLogInfo().put(authLabel, authResult.message());
-        authentication.getRuntimeInstance().getServletRequest().setAttribute(Constants.AUTHENTICATION, authentication);
-        return authentication;
+    private SecurityInfo setValidateResult(String validateLabel, Result validateResult) {
+        SecurityInfo securityInfo = SecurityUtils.getSecurityInfo();
+        securityInfo.setValidateResult(validateResult);
+        securityInfo.getRuntimeInstance().getLogInfo().put(validateLabel, validateResult.message());
+        securityInfo.getRuntimeInstance().getServletRequest().setAttribute(Constants.SECURITY_INFO, securityInfo);
+        return securityInfo;
     }
-    private Authentication setValidateResultAndPrintLog(String authLabel, Result authResult) {
-        Authentication authentication = this.setValidateResult(authLabel, authResult);
-        this.printLog(authentication);
-        return authentication;
+    private SecurityInfo setValidateResultAndPrintLog(String validateLabel, Result validateResult) {
+        SecurityInfo securityInfo = this.setValidateResult(validateLabel, validateResult);
+        this.printLog(securityInfo);
+        return securityInfo;
     }
-    private void printLog(Authentication authentication) {
-        securityConfiguration.getLogHandler().onLog(authentication.getRuntimeInstance().getLogInfo());
+    private void printLog(SecurityInfo securityInfo) {
+        securityConfiguration.getLogHandler().onLog(securityInfo.getRuntimeInstance().getLogInfo());
     }
 }

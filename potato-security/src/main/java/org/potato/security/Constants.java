@@ -2,9 +2,9 @@ package org.potato.security;
 
 public interface Constants {
 
-    public static final String AUTHENTICATION = "authentication";
-
-    public static final String AUTH_USER = "authUser";
-
     public static final String TOKEN = "Token";
+
+    public static final String SECURITY_INFO = "securityInfo";
+
+    public static final String SECURITY_USER = "securityUser";
 }

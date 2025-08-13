@@ -30,8 +30,8 @@ public class SecurityConfigurationBuilder {
         return this;
     }
 
-    public SecurityConfigurationBuilder enableGlobalAuthenticated(boolean enableGlobalAuthenticated) {
-        securityConfiguration.setEnableGlobalAuthenticated(enableGlobalAuthenticated);
+    public SecurityConfigurationBuilder enableGlobalSecurity(boolean enableGlobalSecurity) {
+        securityConfiguration.setEnableGlobalSecurity(enableGlobalSecurity);
         return this;
     }
 
@@ -48,12 +48,12 @@ public class SecurityConfigurationBuilder {
         securityConfiguration.setLoginSuccessHandler(loginSuccessHandler);
         return this;
     }
-    public SecurityConfigurationBuilder addAuthenticationSuccessHandler(AuthenticationSuccessHandler authenticationSuccessHandler) {
-        securityConfiguration.setAuthenticationSuccessHandler(authenticationSuccessHandler);
+    public SecurityConfigurationBuilder addValidationSuccessHandler(ValidationSuccessHandler validationSuccessHandler) {
+        securityConfiguration.setValidationSuccessHandler(validationSuccessHandler);
         return this;
     }
-    public SecurityConfigurationBuilder addAuthenticationFailureHandler(AuthenticationFailureHandler authenticationFailureHandler) {
-        securityConfiguration.setAuthenticationFailureHandler(authenticationFailureHandler);
+    public SecurityConfigurationBuilder addValidationFailureHandler(ValidationFailureHandler validationFailureHandler) {
+        securityConfiguration.setValidationFailureHandler(validationFailureHandler);
         return this;
     }
     public SecurityConfigurationBuilder addLogHandler(LogHandler logHandler) {
@@ -67,9 +67,9 @@ public class SecurityConfigurationBuilder {
      */
     public SecurityConfiguration build() {
 
-        // 当项目未配置时，默认不启用全局认证
-        if (securityConfiguration.getEnableGlobalAuthenticated() == null) {
-            securityConfiguration.setEnableGlobalAuthenticated(false);
+        // 当项目未配置时，默认不启用全局安全
+        if (securityConfiguration.getEnableGlobalSecurity() == null) {
+            securityConfiguration.setEnableGlobalSecurity(false);
         }
 
         // 当项目未配置时，默认不启用RefreshToken
@@ -84,11 +84,11 @@ public class SecurityConfigurationBuilder {
         if (securityConfiguration.getLoginSuccessHandler() == null) {
             securityConfiguration.setLoginSuccessHandler(new DefaultLoginSuccessHandler());
         }
-        if (securityConfiguration.getAuthenticationSuccessHandler() == null) {
-            securityConfiguration.setAuthenticationSuccessHandler(new DefaultAuthenticationSuccessHandler());
+        if (securityConfiguration.getValidationSuccessHandler() == null) {
+            securityConfiguration.setValidationSuccessHandler(new DefaultValidationSuccessHandler());
         }
-        if (securityConfiguration.getAuthenticationFailureHandler() == null) {
-            securityConfiguration.setAuthenticationFailureHandler(new DefaultAuthenticationFailureHandler());
+        if (securityConfiguration.getValidationFailureHandler() == null) {
+            securityConfiguration.setValidationFailureHandler(new DefaultValidationFailureHandler());
         }
         if (securityConfiguration.getLogHandler() == null) {
             securityConfiguration.setLogHandler(new DefaultLogHandler());
@@ -97,7 +97,7 @@ public class SecurityConfigurationBuilder {
         // AuthenticationProvider中需要获取SecurityConfiguration中的配置信息，故需要此设置，其它类需要配置信息时也是如此
         securityConfiguration.getAuthenticationProvider().setSecurityConfiguration(securityConfiguration);
 
-        logger.info("build completed, enableGlobalAuthenticated is {}", securityConfiguration.getEnableGlobalAuthenticated());
+        logger.info("build completed, enableGlobalSecurity is {}", securityConfiguration.getEnableGlobalSecurity());
         return securityConfiguration;
     }
 }

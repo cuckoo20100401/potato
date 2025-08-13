@@ -35,7 +35,7 @@ public class TokenUtils {
 	 * @param user
 	 * @return
 	 */
-	public static String createToken(AuthUser user) {
+	public static String createToken(SecurityUser user) {
     	
     	ZonedDateTime zonedDateTime = LocalDateTime.now().atZone(ZoneId.of("Asia/Shanghai")).plusMinutes(token_expired_minutes);
 		long since1970Seconds = zonedDateTime.toEpochSecond();
@@ -70,7 +70,7 @@ public class TokenUtils {
 	 * @param user
 	 * @return
 	 */
-	public static String createRefreshToken(AuthUser user) {
+	public static String createRefreshToken(SecurityUser user) {
     	
     	ZonedDateTime zonedDateTime = LocalDateTime.now().atZone(ZoneId.of("Asia/Shanghai")).plusMinutes(refresh_token_expired_minutes);
 		long since1970Seconds = zonedDateTime.toEpochSecond();

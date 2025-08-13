@@ -3,12 +3,12 @@ package org.potato.security.mvc.controller;
 import jakarta.servlet.http.HttpServletRequest;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.potato.security.AuthUser;
-import org.potato.security.Authentication;
+import org.potato.security.SecurityUser;
+import org.potato.security.SecurityInfo;
 import org.potato.security.Constants;
 import org.potato.security.annotation.Security;
 import org.potato.security.config.SecurityConfiguration;
-import org.potato.security.mvc.entity.AuthUser4Login;
+import org.potato.security.mvc.entity.AuthenticationUser;
 import org.potato.security.mvc.entity.RefreshToken;
 import org.potato.security.mvc.service.AuthenticationService;
 import org.potato.util.Result;
@@ -44,51 +44,51 @@ public class AuthenticationController {
 	 * </p>
 	 */
 	@PostMapping({"/getToken", "/login"})
-	public Result login(@RequestBody AuthUser4Login authUser4Login, HttpServletRequest request) {
+	public Result login(@RequestBody AuthenticationUser authenticationUser, HttpServletRequest request) {
 
-		if (StringUtils.isNullOrEmpty(authUser4Login.getUsername())) {
+		if (StringUtils.isNullOrEmpty(authenticationUser.getUsername())) {
 			return Result.failure().code(ResponseCode.LOGIN_USERNAME_IS_REQUIRED).message("帐号不能为空");
 		}
-		if (StringUtils.isNullOrEmpty(authUser4Login.getPassword())) {
+		if (StringUtils.isNullOrEmpty(authenticationUser.getPassword())) {
 			return Result.failure().code(ResponseCode.LOGIN_PASSWORD_IS_REQUIRED).message("密码不能为空");
 		}
-		if (StringUtils.isNullOrEmpty(authUser4Login.getClientType())) {
+		if (StringUtils.isNullOrEmpty(authenticationUser.getClientType())) {
 			return Result.failure().code(ResponseCode.LOGIN_CLIENTTYPE_IS_REQUIRED).message("客户端类型不能为空");
 		}
 		
-		AuthUser authUser = authenticationService.findAuthUserByUsername(authUser4Login.getUsername());
-		if (authUser == null) {
+		SecurityUser securityUser = authenticationService.findAuthUserByUsername(authenticationUser.getUsername());
+		if (securityUser == null) {
 			return Result.failure().code(ResponseCode.LOGIN_USERNAME_IS_NOT_EXIST).message("帐号不存在");
 		}
-		if (!authUser.getPassword().equals(StringUtils.encryptByAES(authUser4Login.getPassword()))) {
+		if (!securityUser.getPassword().equals(StringUtils.encryptByAES(authenticationUser.getPassword()))) {
 			return Result.failure().code(ResponseCode.LOGIN_PASSWORD_IS_INCORRECT).message("密码错误");
 		}
-		if (authUser.getStatus() != null && authUser.getStatus() == -1) {
+		if (securityUser.getStatus() != null && securityUser.getStatus() == -1) {
 			return Result.failure().code(ResponseCode.LOGIN_USERNAME_IS_DISABLED).message("帐号已被禁用");
 		}
 
-		authUser.setClientType(authUser4Login.getClientType());
-		authUser.setRoles(authenticationService.findAuthUserRolesById(authUser.getId()));
-		authUser.setPerms(authenticationService.findAuthUserPermsById(authUser.getId()));
+		securityUser.setClientType(authenticationUser.getClientType());
+		securityUser.setRoles(authenticationService.findAuthUserRolesById(securityUser.getId()));
+		securityUser.setPerms(authenticationService.findAuthUserPermsById(securityUser.getId()));
 
-		Map<String, Object> authUserX = new LinkedHashMap<>();
-		authUserX.put("id", authUser.getId());
-		authUserX.put("username", authUser.getUsername());
-		authUserX.put("nickname", authUser.getNickname());
-		authUserX.put("roles", authUser.getRoles());
-		authUserX.put("perms", authUser.getPerms());
-		securityConfiguration.getLoginSuccessHandler().onLoginSuccess(authUser, authUserX);
+		Map<String, Object> authenticationUserX = new LinkedHashMap<>();
+		authenticationUserX.put("id", securityUser.getId());
+		authenticationUserX.put("username", securityUser.getUsername());
+		authenticationUserX.put("nickname", securityUser.getNickname());
+		authenticationUserX.put("roles", securityUser.getRoles());
+		authenticationUserX.put("perms", securityUser.getPerms());
+		securityConfiguration.getLoginSuccessHandler().onLoginSuccess(securityUser, authenticationUserX);
 
 		String authenticationProviderName = securityConfiguration.getAuthenticationProvider().getClass().getSimpleName();
 		if (authenticationProviderName.equals("CookieAndSessionAuthenticationProvider")) {
-			request.getSession().setAttribute(Constants.AUTH_USER, authUser);
-			return Result.success().addPayload("authUser", authUserX);
+			request.getSession().setAttribute(Constants.SECURITY_USER, securityUser);
+			return Result.success().addPayload("authUser", authenticationUserX);
 		} else if (authenticationProviderName.equals("CookieAndTokenAuthenticationProvider") || authenticationProviderName.equals("TokenAuthenticationProvider")) {
-			authUserX.put("token", securityConfiguration.getTokenHandler().createToken(authUser));
+			authenticationUserX.put("token", securityConfiguration.getTokenHandler().createToken(securityUser));
 			if (securityConfiguration.getEnableRefreshToken()) {
-				authUserX.put("refreshToken", securityConfiguration.getTokenHandler().createRefreshToken(authUser));
+				authenticationUserX.put("refreshToken", securityConfiguration.getTokenHandler().createRefreshToken(securityUser));
 			}
-			return Result.success().addPayload("authUser", authUserX);
+			return Result.success().addPayload("authUser", authenticationUserX);
 		} else {
 			logger.error("configuration error, there is no such authentication provider["+authenticationProviderName+"]");
 			return Result.failure().message("login failed");
@@ -101,27 +101,27 @@ public class AuthenticationController {
 	@PostMapping("/refreshToken")
 	public Result refreshToken(@RequestBody RefreshToken refreshToken) {
 
-		AuthUser authUser = new AuthUser();
-		authUser.setRefreshToken(refreshToken.getRefreshToken());
-		Authentication authentication = new Authentication();
-		authentication.setAuthUser(authUser);
+		SecurityUser securityUser = new SecurityUser();
+		securityUser.setRefreshToken(refreshToken.getRefreshToken());
+		SecurityInfo securityInfo = new SecurityInfo();
+		securityInfo.setAuthUser(securityUser);
 
-		authentication = securityConfiguration.getTokenHandler().verifyAndParseRefreshToken(authentication);
+		securityInfo = securityConfiguration.getTokenHandler().verifyAndParseRefreshToken(securityInfo);
 
-		if (authentication.getAuthResult().isSuccess()) {
+		if (securityInfo.getValidateResult().isSuccess()) {
 
-			authUser = authenticationService.findAuthUserByUsername(authentication.getAuthUser().getUsername());
-			if (authUser == null) {
+			securityUser = authenticationService.findAuthUserByUsername(securityInfo.getAuthUser().getUsername());
+			if (securityUser == null) {
 				return Result.failure().code(ResponseCode.LOGIN_USERNAME_IS_NOT_EXIST).message("帐号不存在");
 			}
-			if (authUser.getStatus() == -1) {
+			if (securityUser.getStatus() == -1) {
 				return Result.failure().code(ResponseCode.LOGIN_USERNAME_IS_DISABLED).message("帐号已被禁用");
 			}
 
-			authUser.setRoles(authenticationService.findAuthUserRolesById(authUser.getId()));
-			authUser.setPerms(authenticationService.findAuthUserPermsById(authUser.getId()));
-			return Result.success().addPayload("token", securityConfiguration.getTokenHandler().createToken(authUser)).addPayload("refreshToken", securityConfiguration.getTokenHandler().createRefreshToken(authUser));
+			securityUser.setRoles(authenticationService.findAuthUserRolesById(securityUser.getId()));
+			securityUser.setPerms(authenticationService.findAuthUserPermsById(securityUser.getId()));
+			return Result.success().addPayload("token", securityConfiguration.getTokenHandler().createToken(securityUser)).addPayload("refreshToken", securityConfiguration.getTokenHandler().createRefreshToken(securityUser));
 		}
-		return Result.failure().code(authentication.getAuthResult().code()).message(authentication.getAuthResult().message());
+		return Result.failure().code(securityInfo.getValidateResult().code()).message(securityInfo.getValidateResult().message());
 	}
 }

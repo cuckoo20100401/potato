@@ -1,6 +1,6 @@
 package org.potato.security.handler;
 
-import org.potato.security.Authentication;
+import org.potato.security.SecurityInfo;
 
 /**
  * LoginFailureHandler
@@ -11,5 +11,5 @@ import org.potato.security.Authentication;
  */
 public interface LoginFailureHandler {
 
-    void onLoginFailure(Authentication authentication);
+    void onLoginFailure(SecurityInfo securityInfo);
 }

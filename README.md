@@ -91,7 +91,7 @@ public class CoreApplication {
 package com.cuckoo.project.common.config;
 
 import com.cuckoo.project.common.dao.SysUserDAO;
-import org.potato.security.AuthUser;
+import org.potato.security.SecurityUser;
 import org.potato.security.config.SecurityConfiguration;
 import org.potato.security.mvc.service.AuthenticationService;
 import org.potato.security.provider.TokenAuthenticationProvider;
@@ -141,11 +141,11 @@ package com.cuckoo.project.common.config;
 
 import com.cuckoo.project.common.dao.SysUserDAO;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.potato.security.AuthUser;
-import org.potato.security.Authentication;
+import org.potato.security.SecurityUser;
+import org.potato.security.SecurityInfo;
 import org.potato.security.config.SecurityConfiguration;
-import org.potato.security.handler.AuthenticationFailureHandler;
-import org.potato.security.handler.AuthenticationSuccessHandler;
+import org.potato.security.handler.ValidationFailureHandler;
+import org.potato.security.handler.ValidationSuccessHandler;
 import org.potato.security.handler.TokenHandler;
 import org.potato.security.mvc.service.AuthenticationService;
 import org.potato.security.provider.TokenAuthenticationProvider;
@@ -190,54 +190,54 @@ public class SecurityConfig {
                 .enableRefreshToken(true)
                 .addTokenHandler(new TokenHandler() {
                     @Override
-                    public String createToken(AuthUser authUser) {
+                    public String createToken(AuthUser securityUser) {
                         return null;
                     }
 
                     @Override
-                    public String createRefreshToken(AuthUser authUser) {
+                    public String createRefreshToken(AuthUser securityUser) {
                         return null;
                     }
 
                     @Override
-                    public Authentication verifyAndParseToken(Authentication authentication) {
+                    public Authentication verifyAndParseToken(Authentication securityInfo) {
 
                         // 1.verify token
-                        String accessToken = authentication.getAuthUser().getAccessToken();
+                        String accessToken = securityInfo.getAuthUser().getAccessToken();
 
                         // 2.parse token
-                        AuthUser authUser = authentication.getAuthUser();
-                        authUser.setId("id");
-                        authUser.setUsername("username");
-                        authUser.setNickname("nickname");
+                        AuthUser securityUser = securityInfo.getAuthUser();
+                        securityUser.setId("id");
+                        securityUser.setUsername("username");
+                        securityUser.setNickname("nickname");
                         /* set other properties */
-                        authUser.setRoles(new String[]{"guest"});
-                        authUser.setPerms(new String[]{"sys:user:view", "sys:user:edit"});
+                        securityUser.setRoles(new String[]{"guest"});
+                        securityUser.setPerms(new String[]{"sys:user:view", "sys:user:edit"});
 
                         // 3.update token, is optional
-                        HttpServletResponse response = (HttpServletResponse) authentication.getRuntimeInstance().getServletResponse();
+                        HttpServletResponse response = (HttpServletResponse) securityInfo.getRuntimeInstance().getServletResponse();
                         response.addCookie(new Cookie("Token", "token-created"));
 
                         // 4.set auth result
-                        authentication.setAuthResult(Result.success());
-                        return authentication;
+                        securityInfo.setAuthResult(Result.success());
+                        return securityInfo;
                     }
 
                     @Override
-                    public Authentication verifyAndParseRefreshToken(Authentication authentication) {
+                    public Authentication verifyAndParseRefreshToken(Authentication securityInfo) {
                         return null;
                     }
                 })
                 .addLoginSuccessHandler(new LoginSuccessHandler() {
                     @Override
-                    public void onLoginSuccess(AuthUser authUser, Map<String, Object> authUserX) {
+                    public void onLoginSuccess(AuthUser securityUser, Map<String, Object> authUserX) {
                         // add extra attributes send to client
                         authUserX.put("extraAttribute1", "value1");
                         authUserX.put("extraAttribute2", "value2");
                         // save authUserSessionStatus to redis and set the expiration time
-                        String redisKey = Constant.Redis.keyPrefix.authUser + authUser.getUsername();
+                        String redisKey = Constant.Redis.keyPrefix.securityUser + securityUser.getUsername();
                         Map<String, Object> redisValue = new LinkedHashMap<>();
-                        redisValue.put("authUserId", authUser.getId());
+                        redisValue.put("authUserId", securityUser.getId());
                         redisValue.put("loginTime", LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
                         redisValue.put("sessionDurationMinutes", Constant.authUserSessionDurationMinutes);
                         redisValue.put("sessionRemainingDurationMinutes", Constant.authUserSessionDurationMinutes);
@@ -247,18 +247,18 @@ public class SecurityConfig {
                 })
                 .addAuthenticationSuccessHandler(new AuthenticationSuccessHandler() {
                     @Override
-                    public void onAuthenticationSuccess(Authentication authentication) {
-                        HttpServletRequest request = (HttpServletRequest) authentication.getRuntimeInstance().getServletRequest();
+                    public void onAuthenticationSuccess(Authentication securityInfo) {
+                        HttpServletRequest request = (HttpServletRequest) securityInfo.getRuntimeInstance().getServletRequest();
                         request.setAttribute("currentRequestURI", request.getRequestURI());
                     }
                 })
                 .addAuthenticationFailureHandler(new AuthenticationFailureHandler() {
                     @Override
-                    public void onAuthenticationFailure(Authentication authentication) {
+                    public void onAuthenticationFailure(Authentication securityInfo) {
                         try {
-                            HttpServletResponse response = (HttpServletResponse) authentication.getRuntimeInstance().getServletResponse();
+                            HttpServletResponse response = (HttpServletResponse) securityInfo.getRuntimeInstance().getServletResponse();
                             response.setContentType("application/json;charset=utf-8");
-                            Result result = Result.failure().code(authentication.getAuthResult().code()).message(authentication.getAuthResult().message());
+                            Result result = Result.failure().code(securityInfo.getAuthResult().code()).message(securityInfo.getAuthResult().message());
                             response.getWriter().write(objectMapper.writeValueAsString(result));
                         } catch (IOException e) {
                             e.printStackTrace();
