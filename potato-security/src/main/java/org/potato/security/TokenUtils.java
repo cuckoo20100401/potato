@@ -1,12 +1,5 @@
 package org.potato.security;
 
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTVerificationException;
@@ -17,6 +10,11 @@ import com.auth0.jwt.interfaces.JWTVerifier;
 import org.potato.util.Result;
 import org.potato.util.StringUtils;
 
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.util.HashMap;
+import java.util.Map;
+
 public class TokenUtils {
 
 	public static String secret = "https://www.debian.org/";
@@ -24,78 +22,44 @@ public class TokenUtils {
 	public static long refresh_token_expired_minutes = token_expired_minutes*2;
 	public static final Algorithm algorithm = Algorithm.HMAC256(secret);
 
+	public static String createToken(SecurityUser securityUser) {
+    	
+        Map<String, Object> headerClaims = new HashMap<>();
+        headerClaims.put("owner", "UniversalSecurity");
+        
+        String token = JWT.create()
+        		.withHeader(headerClaims)
+        		.withIssuer("potato")
+        		.withIssuedAt(Instant.now())
+				.withExpiresAt(Instant.now().plus(token_expired_minutes, ChronoUnit.MINUTES))
+        		.withClaim("id", securityUser.getId())
+        		.withClaim("username", securityUser.getUsername())
+				.withClaim("nickname", securityUser.getNickname())
+				.withClaim("clientType", securityUser.getClientType())
+				.withClaim("roles", securityUser.getRoles())
+				.withClaim("perms", securityUser.getPerms())
+				.withClaim("extra", securityUser.getExtra())
+        		.sign(algorithm);
+        return token;
+    }
 
-	/**
-	 * 创建Token
-	 *
-	 * <p>
-	 *     可以将AuthUser中的所有信息（除过accessToken）放入token中，而不必关心这些属性中是否有值，是否有值取决于AuthenticationService.findAuthUserByUsername(String username)的实现。
-	 *     这样做的好处就是token中存放了丰富的信息，而不需要通过用户ID再去Redis中取用户信息了
-	 * </p>
-	 * @param user
-	 * @return
-	 */
-	public static String createToken(SecurityUser user) {
-    	
-    	ZonedDateTime zonedDateTime = LocalDateTime.now().atZone(ZoneId.of("Asia/Shanghai")).plusMinutes(token_expired_minutes);
-		long since1970Seconds = zonedDateTime.toEpochSecond();
-		Date expiredDate = new Date(since1970Seconds*1000);
+	public static String createRefreshToken(SecurityUser securityUser) {
     	
         Map<String, Object> headerClaims = new HashMap<>();
         headerClaims.put("owner", "UniversalSecurity");
         
         String token = JWT.create()
         		.withHeader(headerClaims)
-        		.withIssuer("auth0")
-        		.withIssuedAt(new Date())
-        		.withExpiresAt(expiredDate)
-        		.withClaim("user.id", user.getId())
-        		.withClaim("user.username", user.getUsername())
-				.withClaim("user.nickname", user.getNickname())
-				.withClaim("user.cellphone", user.getCellphone())
-				.withClaim("user.telephone", user.getTelephone())
-				.withClaim("user.email", user.getEmail())
-				.withClaim("user.companyId", user.getCompanyId())
-				.withArrayClaim("user.manageGroupIds", user.getManageGroupIds())
-        		.withArrayClaim("user.roles", user.getRoles())
-        		.withArrayClaim("user.perms", user.getPerms())
-				.withClaim("user.clientType", user.getClientType())
+        		.withIssuer("potato")
+        		.withIssuedAt(Instant.now())
+        		.withExpiresAt(Instant.now().plus(refresh_token_expired_minutes, ChronoUnit.MINUTES))
+				.withClaim("id", securityUser.getId())
+				.withClaim("username", securityUser.getUsername())
+				.withClaim("clientType", securityUser.getClientType())
         		.sign(algorithm);
         return token;
     }
-	
-	/**
-	 * 创建refresh_token
-	 *
-	 * @param user
-	 * @return
-	 */
-	public static String createRefreshToken(SecurityUser user) {
-    	
-    	ZonedDateTime zonedDateTime = LocalDateTime.now().atZone(ZoneId.of("Asia/Shanghai")).plusMinutes(refresh_token_expired_minutes);
-		long since1970Seconds = zonedDateTime.toEpochSecond();
-		Date expiredDate = new Date(since1970Seconds*1000);
-    	
-        Map<String, Object> headerClaims = new HashMap<>();
-        headerClaims.put("owner", "UniversalSecurity");
-        
-        String token = JWT.create()
-        		.withHeader(headerClaims)
-        		.withIssuer("auth0")
-        		.withIssuedAt(new Date())
-        		.withExpiresAt(expiredDate)
-        		.withClaim("user.id", user.getId())
-				.withClaim("user.username", user.getUsername())
-        		.sign(algorithm);
-        return token;
-    }
-	
-	/**
-	 * 检验token
-	 *
-	 * @param token
-	 * @return
-	 */
+
 	public static Result verify(String token) {
 
 		if (StringUtils.isNullOrEmpty(token)) {

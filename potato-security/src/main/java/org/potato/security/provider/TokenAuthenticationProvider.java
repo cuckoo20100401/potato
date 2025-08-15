@@ -1,7 +1,6 @@
 package org.potato.security.provider;
 
 import jakarta.servlet.http.HttpServletRequest;
-import org.potato.security.SecurityUser;
 import org.potato.security.SecurityInfo;
 import org.potato.security.Constants;
 
@@ -19,9 +18,7 @@ public class TokenAuthenticationProvider extends AuthenticationProvider {
 
         // Obtain token from header
         HttpServletRequest request = (HttpServletRequest) securityInfo.getRuntimeInstance().getServletRequest();
-        SecurityUser securityUser = new SecurityUser();
-        securityUser.setAccessToken(request.getHeader(Constants.TOKEN));
-        securityInfo.setSecurityUser(securityUser);
+        securityInfo.getSecurityUser().setAccessToken(request.getHeader(Constants.TOKEN));
 
         // Verify and parse token
         securityInfo = securityConfiguration.getTokenHandler().verifyAndParseToken(securityInfo);

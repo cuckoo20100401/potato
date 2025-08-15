@@ -98,7 +98,7 @@ public class SecurityAspect {
         if (requiresRolesAnnotation.value().length > 0) {
             int hasRoleCount = 0;
             for (String requiresRole: requiresRolesAnnotation.value()) {
-                if (Arrays.stream(securityInfo.getSecurityUser().getRoles()).toList().contains(requiresRole)) {
+                if (securityInfo.getSecurityUser().getRoles().contains(requiresRole)) {
                     hasRoleCount++;
                 }
             }
@@ -130,7 +130,7 @@ public class SecurityAspect {
         if (requiresPermsAnnotation.value().length > 0) {
             int hasPermCount = 0;
             for (String requiresPerm: requiresPermsAnnotation.value()) {
-                if (Arrays.stream(securityInfo.getSecurityUser().getPerms()).toList().contains(requiresPerm)) {
+                if (securityInfo.getSecurityUser().getPerms().contains(requiresPerm)) {
                     hasPermCount++;
                 }
             }

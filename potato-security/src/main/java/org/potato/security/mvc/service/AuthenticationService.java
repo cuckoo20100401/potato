@@ -1,6 +1,9 @@
 package org.potato.security.mvc.service;
 
-import org.potato.security.SecurityUser;
+import org.potato.security.mvc.entity.AuthUser;
+
+import java.util.List;
+import java.util.Map;
 
 /**
  * AuthenticationService
@@ -15,8 +18,10 @@ import org.potato.security.SecurityUser;
  */
 public interface AuthenticationService {
 
-    SecurityUser getAuthUserByUsername(String username);
+    AuthUser getAuthUserByUsername(String username);
 
-    String[] getAuthUserRolesById(String authUserId);
-    String[] getAuthUserPermsById(String authUserId);
+    List<String> getAuthUserRolesById(String authUserId);
+    List<String> getAuthUserPermsById(String authUserId);
+
+    Map<String, Object> getAuthUserExtraById(String authUserId);
 }

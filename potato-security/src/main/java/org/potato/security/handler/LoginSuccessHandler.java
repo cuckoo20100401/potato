@@ -1,7 +1,5 @@
 package org.potato.security.handler;
 
-import org.potato.security.SecurityUser;
-
 import java.util.Map;
 
 /**
@@ -14,10 +12,9 @@ import java.util.Map;
 public interface LoginSuccessHandler {
 
     /**
-     * 用来添加在登录成功后给客户端返回的消息负载
+     * 用来添加在登录成功后给客户端返回的额外属性
      *
-     * @param securityUser   数据库中的认证用户
      * @param authUserX  返回给客户端的消息负载
      */
-    void onLoginSuccess(SecurityUser securityUser, Map<String, Object> authUserX);
+    void onLoginSuccess(Map<String, Object> authUserX);
 }

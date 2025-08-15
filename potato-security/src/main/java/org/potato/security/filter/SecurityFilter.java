@@ -7,6 +7,7 @@ import jakarta.servlet.*;
 import jakarta.servlet.annotation.WebFilter;
 import org.potato.security.SecurityInfo;
 import org.potato.security.SecurityManager;
+import org.potato.security.SecurityUser;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
@@ -39,6 +40,7 @@ public class SecurityFilter implements Filter {
 		runtimeInstance.setLogInfo(new LinkedHashMap<>());
 
 		SecurityInfo securityInfo = new SecurityInfo();
+		securityInfo.setSecurityUser(new SecurityUser());
 		securityInfo.setRuntimeInstance(runtimeInstance);
 
 		securityManager.validate(securityInfo);

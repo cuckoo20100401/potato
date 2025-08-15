@@ -2,13 +2,19 @@ package org.potato.security.mvc.entity;
 
 public class AuthUser {
 
+    private String id;
     private String username;
     private String password;
+    private String nickname;
+    private Integer status;
 
-    /**
-     * web,android,apple,wxapp,smartdoc
-     */
-    private String clientType;
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
 
     public String getUsername() {
         return username;
@@ -26,11 +32,19 @@ public class AuthUser {
         this.password = password;
     }
 
-    public String getClientType() {
-        return clientType;
+    public String getNickname() {
+        return nickname;
     }
 
-    public void setClientType(String clientType) {
-        this.clientType = clientType;
+    public void setNickname(String nickname) {
+        this.nickname = nickname;
+    }
+
+    public Integer getStatus() {
+        return status;
+    }
+
+    public void setStatus(Integer status) {
+        this.status = status;
     }
 }

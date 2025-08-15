@@ -2,7 +2,6 @@ package org.potato.security.provider;
 
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
-import org.potato.security.SecurityUser;
 import org.potato.security.SecurityInfo;
 import org.potato.security.Constants;
 
@@ -24,7 +23,7 @@ public class CookieAndTokenAuthenticationProvider extends AuthenticationProvider
     @Override
     public SecurityInfo check(SecurityInfo securityInfo) {
 
-        //* obtain token from cookie
+        // Obtain token from cookie
         String accessToken = null;
         HttpServletRequest request = (HttpServletRequest) securityInfo.getRuntimeInstance().getServletRequest();
         if (request.getCookies() != null) {
@@ -33,13 +32,9 @@ public class CookieAndTokenAuthenticationProvider extends AuthenticationProvider
                 accessToken = accessTokenCookie.getValue();
             }
         }
+        securityInfo.getSecurityUser().setAccessToken(accessToken);
 
-        //* set token to Authentication.AuthUser
-        SecurityUser securityUser = new SecurityUser();
-        securityUser.setAccessToken(accessToken);
-        securityInfo.setSecurityUser(securityUser);
-
-        //* verify and parse token, or update token by method verifyToken. update token is optional
+        // Verify and parse token. And can update token in here, update token is optional
         securityInfo = securityConfiguration.getTokenHandler().verifyAndParseToken(securityInfo);
         if (securityInfo.getValidateResult().isSuccess()) {
             securityInfo.setAuthenticated(true);

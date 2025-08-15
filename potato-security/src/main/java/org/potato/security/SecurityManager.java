@@ -1,6 +1,5 @@
 package org.potato.security;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.apache.logging.log4j.LogManager;
@@ -25,8 +24,6 @@ public class SecurityManager {
 
     @Autowired
     private SecurityConfiguration securityConfiguration;
-    @Autowired
-    private ObjectMapper objectMapper;
 
     /**
      * validate
@@ -44,15 +41,7 @@ public class SecurityManager {
 
         HttpServletRequest request = (HttpServletRequest) securityInfo.getRuntimeInstance().getServletRequest();
 
-        String currentRequestURI = request.getRequestURI();
-        securityInfo.getRuntimeInstance().getLogInfo().put("requestURI", currentRequestURI);
-        String contextPath = request.getContextPath();
-        if (!contextPath.equals("/")) {
-            currentRequestURI = currentRequestURI.replaceFirst(contextPath, "");
-        }
-
-        String currentRequestPath = currentRequestURI;
-        securityInfo.getRuntimeInstance().getLogInfo().put("requestPath", currentRequestPath);
+        securityInfo.getRuntimeInstance().getLogInfo().put("requestURL", request.getRequestURL().toString());
 
         securityInfo = securityConfiguration.getAuthenticationProvider().check(securityInfo);
         request.setAttribute(Constants.SECURITY_INFO, securityInfo);

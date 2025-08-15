@@ -37,17 +37,13 @@ public class DefaultTokenHandler implements TokenHandler {
         if (result.isSuccess()) {
             Map<String, Claim> accessTokenClaims = result.getPayload("claims");
             SecurityUser securityUser = securityInfo.getSecurityUser();
-            securityUser.setId(accessTokenClaims.get("user.id") == null ? null : accessTokenClaims.get("user.id").asString());
-            securityUser.setUsername(accessTokenClaims.get("user.username") == null ? null : accessTokenClaims.get("user.username").asString());
-            securityUser.setNickname(accessTokenClaims.get("user.nickname") == null ? null : accessTokenClaims.get("user.nickname").asString());
-            securityUser.setCellphone(accessTokenClaims.get("user.cellphone") == null ? null : accessTokenClaims.get("user.cellphone").asString());
-            securityUser.setTelephone(accessTokenClaims.get("user.telephone") == null ? null : accessTokenClaims.get("user.telephone").asString());
-            securityUser.setEmail(accessTokenClaims.get("user.email") == null ? null : accessTokenClaims.get("user.email").asString());
-            securityUser.setCompanyId(accessTokenClaims.get("user.companyId") == null ? null : accessTokenClaims.get("user.companyId").asString());
-            securityUser.setManageGroupIds(accessTokenClaims.get("user.manageGroupIds") == null ? null : accessTokenClaims.get("user.departmentId").asArray(String.class));
-            securityUser.setClientType(accessTokenClaims.get("user.clientType") == null ? null : accessTokenClaims.get("user.clientType").asString());
-            securityUser.setRoles(accessTokenClaims.get("user.roles").asArray(String.class));
-            securityUser.setPerms(accessTokenClaims.get("user.perms").asArray(String.class));
+            securityUser.setId(accessTokenClaims.get("id").asString());
+            securityUser.setUsername(accessTokenClaims.get("username").asString());
+            securityUser.setNickname(accessTokenClaims.get("nickname").asString());
+            securityUser.setClientType(accessTokenClaims.get("clientType").asString());
+            securityUser.setRoles(accessTokenClaims.get("roles").asList(String.class));
+            securityUser.setPerms(accessTokenClaims.get("perms").asList(String.class));
+            securityUser.setExtra(accessTokenClaims.get("extra").asMap());
             securityInfo.setValidateResult(Result.success());
         } else {
             if (result.code() == -1) {
@@ -69,8 +65,9 @@ public class DefaultTokenHandler implements TokenHandler {
         if (result.isSuccess()) {
             Map<String, Claim> accessTokenClaims = result.getPayload("claims");
             SecurityUser securityUser = securityInfo.getSecurityUser();
-            securityUser.setId(accessTokenClaims.get("user.id") == null ? null : accessTokenClaims.get("user.id").asString());
-            securityUser.setUsername(accessTokenClaims.get("user.username") == null ? null : accessTokenClaims.get("user.username").asString());
+            securityUser.setId(accessTokenClaims.get("id").asString());
+            securityUser.setUsername(accessTokenClaims.get("username").asString());
+            securityUser.setClientType(accessTokenClaims.get("clientType").asString());
             securityInfo.setValidateResult(Result.success());
         } else {
             if (result.code() == -1) {
