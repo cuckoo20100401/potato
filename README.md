@@ -90,7 +90,7 @@ public class CoreApplication {
 ```java
 package com.cuckoo.project.common.config;
 
-import com.cuckoo.project.common.dao.SysUserDAO;
+import com.cuckoo.project.common.mapper.AuthenticationMapper;
 import org.potato.security.SecurityUser;
 import org.potato.security.config.SecurityConfiguration;
 import org.potato.security.mvc.service.AuthenticationService;
@@ -103,35 +103,45 @@ import org.springframework.context.annotation.Configuration;
 public class SecurityConfig {
 
     @Autowired
-    private SysUserDAO sysUserDAO;
+    private AuthenticationMapper authenticationMapper;
 
     @Bean
     public SecurityConfiguration securityConfiguration() {
         return SecurityConfiguration.builder()
                 .setAuthenticationProvider(new TokenAuthenticationProvider())
                 .setCreateTokenExpiredMinutes(60)
-                .enableGlobalAuthenticated(true)
+                .enableGlobalSecurity(true)
                 .build();
     }
 
     @Bean
     public AuthenticationService authenticationService() {
-        return new AuthenticationService() {
-            @Override
-            public AuthUser findAuthUserByUsername(String username) {
-                return sysUserDAO.findByUsername(username);
-            }
+       return new AuthenticationService() {
+          @Override
+          public AuthUser getAuthUserByUsername(String username) {
+             return authenticationMapper.selectAuthUserByUsername(username);
+          }
 
-            @Override
-            public String[] findAuthUserRolesById(String id) {
-                return sysUserDAO.findRolesById(id);
-            }
+          @Override
+          public List<String> getAuthUserRolesById(String authUserId) {
+             return authenticationMapper.selectAuthUserRolesById(authUserId);
+          }
 
-            @Override
-            public String[] findAuthUserPermsById(String id) {
-                return sysUserDAO.findPermsById(id);
-            }
-        };
+          @Override
+          public List<String> getAuthUserPermsById(String authUserId) {
+             return authenticationMapper.selectAuthUserPermsById(authUserId);
+          }
+
+          @Override
+          public Map<String, Object> getAuthUserExtraById(String authUserId) {
+             Map<String, Object> extra = new HashMap<>();
+             extra.put("cellphone", "13113026420");
+             extra.put("telephone", "0755-1234567");
+             extra.put("companyId", "uuid");
+             extra.put("manageGroupIds", Arrays.asList("uuid1", "uuid2"));
+             return extra;
+          }
+       };
     }
 }
 ```
@@ -139,7 +149,7 @@ public class SecurityConfig {
 ```java
 package com.cuckoo.project.common.config;
 
-import com.cuckoo.project.common.dao.SysUserDAO;
+import com.cuckoo.project.common.mapper.AuthenticationMapper;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.potato.security.SecurityUser;
 import org.potato.security.SecurityInfo;
@@ -153,11 +163,6 @@ import org.potato.utils.Result;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
 
 /**
  * 安全配置
@@ -176,7 +181,7 @@ import java.io.IOException;
 public class SecurityConfig {
 
     @Autowired
-    private SysUserDAO sysUserDAO;
+    private AuthenticationMapper authenticationMapper;
     @Autowired
     private ObjectMapper objectMapper;
 
@@ -186,83 +191,55 @@ public class SecurityConfig {
                 .setAuthenticationProvider(new TokenAuthenticationProvider())
                 .setCreateTokenSecret("1234")
                 .setCreateTokenExpiredMinutes(60)
-                .enableGlobalAuthenticated(true)
+                .enableGlobalSecurity(true)
                 .enableRefreshToken(true)
                 .addTokenHandler(new TokenHandler() {
                     @Override
-                    public String createToken(AuthUser securityUser) {
+                    public String createToken(SecurityUser securityUser) {
                         return null;
                     }
-
                     @Override
-                    public String createRefreshToken(AuthUser securityUser) {
+                    public String createRefreshToken(SecurityUser securityUser) {
                         return null;
                     }
-
                     @Override
-                    public Authentication verifyAndParseToken(Authentication securityInfo) {
-
-                        // 1.verify token
-                        String accessToken = securityInfo.getAuthUser().getAccessToken();
-
-                        // 2.parse token
-                        AuthUser securityUser = securityInfo.getAuthUser();
-                        securityUser.setId("id");
-                        securityUser.setUsername("username");
-                        securityUser.setNickname("nickname");
-                        /* set other properties */
-                        securityUser.setRoles(new String[]{"guest"});
-                        securityUser.setPerms(new String[]{"sys:user:view", "sys:user:edit"});
-
-                        // 3.update token, is optional
-                        HttpServletResponse response = (HttpServletResponse) securityInfo.getRuntimeInstance().getServletResponse();
-                        response.addCookie(new Cookie("Token", "token-created"));
-
-                        // 4.set auth result
-                        securityInfo.setAuthResult(Result.success());
-                        return securityInfo;
+                    public SecurityInfo verifyAndParseToken(SecurityInfo securityInfo) {
+                       return null;
                     }
-
                     @Override
-                    public Authentication verifyAndParseRefreshToken(Authentication securityInfo) {
+                    public SecurityInfo verifyAndParseRefreshToken(SecurityInfo securityInfo) {
                         return null;
                     }
                 })
                 .addLoginSuccessHandler(new LoginSuccessHandler() {
                     @Override
-                    public void onLoginSuccess(AuthUser securityUser, Map<String, Object> authUserX) {
-                        // add extra attributes send to client
-                        authUserX.put("extraAttribute1", "value1");
-                        authUserX.put("extraAttribute2", "value2");
-                        // save authUserSessionStatus to redis and set the expiration time
-                        String redisKey = Constant.Redis.keyPrefix.securityUser + securityUser.getUsername();
-                        Map<String, Object> redisValue = new LinkedHashMap<>();
-                        redisValue.put("authUserId", securityUser.getId());
-                        redisValue.put("loginTime", LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
-                        redisValue.put("sessionDurationMinutes", Constant.authUserSessionDurationMinutes);
-                        redisValue.put("sessionRemainingDurationMinutes", Constant.authUserSessionDurationMinutes);
-                        redisTemplate.opsForValue().set(redisKey, redisValue, Duration.ofMinutes(Constant.authUserSessionDurationMinutes));
-                        // do something
+                    public void onLoginSuccess(Map<String, Object> authUserX) {
+                        // Add extra attributes send to client
+                       SecurityUser securityUser = SecurityUtils.getSecurityInfo().getSecurityUser();
+                       authUserX.put("companyId", securityUser.getExtra().get("companyId"));
+                       authUserX.put("manageGroupIds", securityUser.getExtra().get("manageGroupIds"));
+                       // Write login log
+                       LogLogin logLogin = new LogLogin();
+                       logLogin.setId(IdUtil.simpleUUID());
+                       logLogin.setUserId(authUserX.get("id").toString());
+                       logLogin.setUserName(authUserX.get("nickname").toString());
+                       logLogin.setLoginTime(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
+                       logLogin.setRemark("该用户已登录");
+                       logger.info(Constant.Log4j2.Marker.RabbitMQ.logLogin, logLogin);
                     }
                 })
-                .addAuthenticationSuccessHandler(new AuthenticationSuccessHandler() {
-                    @Override
-                    public void onAuthenticationSuccess(Authentication securityInfo) {
-                        HttpServletRequest request = (HttpServletRequest) securityInfo.getRuntimeInstance().getServletRequest();
-                        request.setAttribute("currentRequestURI", request.getRequestURI());
-                    }
+                .addValidationSuccessHandler(new ValidationSuccessHandler() {
+                   @Override
+                   public void onValidationSuccess(SecurityInfo securityInfo) {
+                      // For common-top.html
+                      HttpServletRequest request = (HttpServletRequest) securityInfo.getRuntimeInstance().getServletRequest();
+                      request.setAttribute("contextPath", request.getContextPath());
+                   }
                 })
-                .addAuthenticationFailureHandler(new AuthenticationFailureHandler() {
+                .addValidationFailureHandler(new ValidationFailureHandler() {
                     @Override
-                    public void onAuthenticationFailure(Authentication securityInfo) {
-                        try {
-                            HttpServletResponse response = (HttpServletResponse) securityInfo.getRuntimeInstance().getServletResponse();
-                            response.setContentType("application/json;charset=utf-8");
-                            Result result = Result.failure().code(securityInfo.getAuthResult().code()).message(securityInfo.getAuthResult().message());
-                            response.getWriter().write(objectMapper.writeValueAsString(result));
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
+                    public Object onValidationFailure(SecurityInfo securityInfo) {
+                        return "error";
                     }
                 })
                 .addLogHandler(new LogHandler() {
@@ -276,52 +253,63 @@ public class SecurityConfig {
 
     @Bean
     public AuthenticationService authenticationService() {
-        return new AuthenticationService() {
-            @Override
-            public AuthUser findAuthUserByUsername(String username) {
-                return sysUserDAO.findByUsername(username);
-            }
-   
-            @Override
-            public String[] findAuthUserRolesById(String id) {
-                return sysUserDAO.findRolesById(id);
-            }
-   
-            @Override
-            public String[] findAuthUserPermsById(String id) {
-                return sysUserDAO.findPermsById(id);
-            }
-        };
+       return new AuthenticationService() {
+          @Override
+          public AuthUser getAuthUserByUsername(String username) {
+             return authenticationMapper.selectAuthUserByUsername(username);
+          }
+
+          @Override
+          public List<String> getAuthUserRolesById(String authUserId) {
+             return authenticationMapper.selectAuthUserRolesById(authUserId);
+          }
+
+          @Override
+          public List<String> getAuthUserPermsById(String authUserId) {
+             return authenticationMapper.selectAuthUserPermsById(authUserId);
+          }
+
+          @Override
+          public Map<String, Object> getAuthUserExtraById(String authUserId) {
+             Map<String, Object> extra = new HashMap<>();
+             extra.put("cellphone", "13113026420");
+             extra.put("telephone", "0755-1234567");
+             extra.put("companyId", "uuid");
+             extra.put("manageGroupIds", Arrays.asList("uuid1", "uuid2"));
+             return extra;
+          }
+       };
     }
 }
 ```
 3. 应用
-   - 如果启用了全局认证，可以省略@Authenticated注解
-   - RequiresXX开头的注解只能配置一个
-   - 方法级别的注解优先级大于类级别
-   - @Anonymous注解的优先级最高，只要添加了匿名注解，认证时会忽略其它所有注解（如果类中某个方法需要匿名访问，可以仅给该方法加匿名注解即可）
+   - 如果启用了全局认证会对所有的Controller接口校验登录状态
+   - 安全注解可用于类或方法上，并且方法级别的注解优先级大于类级别
+   - 安全注解的所有参数都是可选的，无任何参数时的效果和启用全局认证是一样的，只校验登录状态
+   - 安全注解中的逻辑参数默认值为AND
+   - 如果需要匿名访问，只需要将匿名参数设置为真即可
 ```java
 package com.cuckoo.project.core.controller;
 
 @RestController
 @RequestMapping("/core/sys/user")
-@Anonymous                                                    //表示访问整个Controller是匿名的，不做任何检验
-@Authenticated                                                //表示访问整个Controller是需要认证的，即必须登录
-@RequiresRole("admin")                                        //表示访问整个Controller需要admin角色
-@RequiresPerm("sys:user:view")                                //表示访问整个Controller需要sys:user:view权限
-@RequiresRoleOrPerm(role = "admin", perm = "sys:user:view")   //表示访问整个Controller需要admin角色或sys:user:view权限
-@RequiresRoleAndPerm(role = "admin", perm = "sys:user:view")  //表示访问整个Controller需要admin角色和sys:user:view权限
+@Security(
+    anonymous = false,
+    roles = @RequiresRoles(value = {"guest","user","vipUser","superVipUser"}, logical = Logical.AND),
+    perms = @RequiresPerms(value = {"sys:user:view","sys:user:edit"}, logical = Logical.AND),
+    logical = Logical.AND
+)
 public class SysUserController {
 
     @GetMapping("/getList")
-    @Anonymous                                                    //表示访问这个方法是匿名的，不做任何检验
-    @Authenticated                                                //表示访问这个方法是需要认证的，即必须登录
-    @RequiresRole("admin")                                        //表示访问这个方法需要admin角色
-    @RequiresPerm("sys:user:view")                                //表示访问这个方法需要sys:user:view权限
-    @RequiresRoleOrPerm(role = "admin", perm = "sys:user:view")   //表示访问这个方法需要admin角色或sys:user:view权限
-    @RequiresRoleAndPerm(role = "admin", perm = "sys:user:view")  //表示访问这个方法需要admin角色和sys:user:view权限
+    @Security(
+        anonymous = false,
+        roles = @RequiresRoles(value = {"guest","user","vipUser","superVipUser"}, logical = Logical.AND),
+        perms = @RequiresPerms(value = {"sys:user:view","sys:user:edit"}, logical = Logical.AND),
+        logical = Logical.AND
+    )
     public Result getList() {
-        return sysUserService.findList(sysUser, pageNum, pageSize);
+        return sysUserService.getList(sysUser, pageNum, pageSize);
     }
 }
 ```
