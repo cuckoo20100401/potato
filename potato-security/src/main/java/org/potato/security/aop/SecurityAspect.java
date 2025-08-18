@@ -18,7 +18,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.lang.reflect.Method;
-import java.util.Arrays;
 
 /**
  * SecurityAspect
@@ -150,6 +149,8 @@ public class SecurityAspect {
             }
             if (validateRequiresPermsResult) {
                 securityInfo = this.setValidateResult("validateAuthorization[perm-"+requiresPermsAnnotation.logical().value()+"-perm]", Result.success());
+            } else if (validateRequiresRolesResult && securityAnnotation.logical().value().equals(Logical.OR.value())) {
+                securityInfo = this.setValidateResult("validateAuthorization[perm-"+requiresPermsAnnotation.logical().value()+"-perm]", Result.failure().code(ResponseCode.AUTH_TOKEN_IS_NO_PERMISSION).message("no permission"));
             } else {
                 securityInfo = this.setValidateResultAndPrintLog("validateAuthorization[perm-"+requiresPermsAnnotation.logical().value()+"-perm]", Result.failure().code(ResponseCode.AUTH_TOKEN_IS_NO_PERMISSION).message("no permission"));
                 return securityConfiguration.getValidationFailureHandler().onValidationFailure(securityInfo);
