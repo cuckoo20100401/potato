@@ -5,6 +5,8 @@ import org.apache.ibatis.jdbc.SQL;
 import org.potato.util.db.EntityTableTransformUtils;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.util.Arrays;
 import java.util.List;
 
@@ -77,5 +79,92 @@ public class BaseMapperProvider {
         }
 
         return "INSERT INTO " + tableName + " (" + columns.toString() + ") VALUES " + values.toString();
+    }
+
+    public String update(Object entity, ProviderContext context) {
+
+        Class<?> entityClass = entity.getClass();
+        Field[] entityClassFields = entityClass.getDeclaredFields();
+        String tableName = EntityTableTransformUtils.fromEntityNameToTableName(entityClass.getSimpleName());
+
+        return new SQL() {{
+            UPDATE(tableName);
+            for (Field field : entityClassFields) {
+                int fieldTypeModifiers = field.getType().getModifiers();
+                String fieldTypeName = field.getType().getName();
+                if (fieldTypeModifiers == 17 || fieldTypeModifiers == 1 && Arrays.asList(allowedFieldTypeNames).contains(fieldTypeName)) {
+                    if (!field.getName().equals("id")) {
+                        String column = EntityTableTransformUtils.fromEntityPropertyNameToTableColumnName(field.getName());
+                        SET(column + " = #{" + field.getName() + "}");
+                    }
+                }
+            }
+            WHERE("id = #{id}");
+        }}.toString();
+    }
+
+    public String updateSelective(Object entity, ProviderContext context) throws Exception {
+
+        Class<?> entityClass = entity.getClass();
+        Field[] entityClassFields = entityClass.getDeclaredFields();
+        String tableName = EntityTableTransformUtils.fromEntityNameToTableName(entityClass.getSimpleName());
+
+        return new SQL() {{
+            UPDATE(tableName);
+            for (Field field : entityClassFields) {
+                int fieldTypeModifiers = field.getType().getModifiers();
+                String fieldTypeName = field.getType().getName();
+                if (fieldTypeModifiers == 17 || fieldTypeModifiers == 1 && Arrays.asList(allowedFieldTypeNames).contains(fieldTypeName)) {
+                    Object fieldValue = entityClass.getDeclaredMethod(EntityTableTransformUtils.fromEntityPropertyNameToGetMethodName(field.getName())).invoke(entity);
+                    if (!field.getName().equals("id") && fieldValue != null) {
+                        String column = EntityTableTransformUtils.fromEntityPropertyNameToTableColumnName(field.getName());
+                        SET(column + " = #{" + field.getName() + "}");
+                    }
+                }
+            }
+            WHERE("id = #{id}");
+        }}.toString();
+    }
+
+    public String delete(Object id, ProviderContext context) {
+
+        Class<?> entityClass = getEntityClass(context);
+        String tableName = EntityTableTransformUtils.fromEntityNameToTableName(entityClass.getSimpleName());
+
+        return new SQL() {{
+            DELETE_FROM(tableName);
+            WHERE("id = #{id}");
+        }}.toString();
+    }
+
+    public String deleteBatch(Object[] ids, ProviderContext context) {
+
+        Class<?> entityClass = getEntityClass(context);
+        String tableName = EntityTableTransformUtils.fromEntityNameToTableName(entityClass.getSimpleName());
+
+        StringBuilder values = new StringBuilder();
+        return new SQL() {{
+            DELETE_FROM(tableName);
+            for (int i = 0; i < ids.length; i++) {
+                if (i > 0) {
+                    values.append(", ");
+                }
+                values.append("#{array[").append(i).append("]}");
+            }
+            WHERE("id IN (" + values.toString() + ")");
+        }}.toString();
+    }
+
+    private Class<?> getEntityClass(ProviderContext context) {
+        for (Type genericInterface : context.getMapperType().getGenericInterfaces()) {
+            if (genericInterface instanceof ParameterizedType) {
+                ParameterizedType parameterizedType = (ParameterizedType) genericInterface;
+                Type rawType = parameterizedType.getRawType();
+                if (rawType.equals(org.potato.jdbc.mapper.BaseMapper.class)) {
+                    return (Class<?>) parameterizedType.getActualTypeArguments()[0];
+                }
+            }
+        }
+        throw new IllegalStateException("Unable to determine entity class from mapper type: " + context.getMapperType());
     }
 }
