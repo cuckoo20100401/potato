@@ -10,6 +10,9 @@ public interface BaseMapper<T> {
     @InsertProvider(type = BaseMapperProvider.class, method = "insert")
     int insert(T entity);
 
+    @InsertProvider(type = BaseMapperProvider.class, method = "insertBatch")
+    int insertBatch(List<T> entities);
+
     int update(T entity);
 
     int updateSelective(T entity);
