@@ -1,4 +1,4 @@
-package org.potato.jdbc;
+package org.potato.jdbc.mapper;
 
 import org.apache.ibatis.builder.annotation.ProviderContext;
 import org.apache.ibatis.jdbc.SQL;

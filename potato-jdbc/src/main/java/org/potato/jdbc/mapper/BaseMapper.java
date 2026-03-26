@@ -3,7 +3,6 @@ package org.potato.jdbc.mapper;
 import org.apache.ibatis.annotations.DeleteProvider;
 import org.apache.ibatis.annotations.InsertProvider;
 import org.apache.ibatis.annotations.UpdateProvider;
-import org.potato.jdbc.BaseMapperProvider;
 
 import java.util.List;
 

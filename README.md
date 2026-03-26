@@ -1,11 +1,11 @@
 # potato
 
-Contains universal functions for java web project.
+Provide universal functions for your springboot project.
 
 
 ## Supports
 
-- Spring java web project.
+- SpringBoot project.
 
 
 ## Install
@@ -138,7 +138,8 @@ public class SecurityConfig {
              extra.put("cellphone", "13113026420");
              extra.put("telephone", "0755-1234567");
              extra.put("companyId", "uuid");
-             extra.put("manageGroupIds", Arrays.asList("uuid1", "uuid2"));
+             extra.put("departmentId", "uuid");
+             extra.put("hobbies", Arrays.asList("hobby1", "hobby2"));
              return extra;
           }
        };
@@ -214,10 +215,10 @@ public class SecurityConfig {
                 .addLoginSuccessHandler(new LoginSuccessHandler() {
                     @Override
                     public void onLoginSuccess(Map<String, Object> authUserX) {
-                        // Add extra attributes send to client
+                        // This will be sent to the client after successful login
                        SecurityUser securityUser = SecurityUtils.getSecurityInfo().getSecurityUser();
                        authUserX.put("companyId", securityUser.getExtra().get("companyId"));
-                       authUserX.put("manageGroupIds", securityUser.getExtra().get("manageGroupIds"));
+                       authUserX.put("departmentId", securityUser.getExtra().get("departmentId"));
                        // Write login log
                        LogLogin logLogin = new LogLogin();
                        logLogin.setId(IdUtil.simpleUUID());
@@ -231,7 +232,6 @@ public class SecurityConfig {
                 .addValidationSuccessHandler(new ValidationSuccessHandler() {
                    @Override
                    public void onValidationSuccess(SecurityInfo securityInfo) {
-                      // For common-top.html
                       HttpServletRequest request = (HttpServletRequest) securityInfo.getRuntimeInstance().getServletRequest();
                       request.setAttribute("contextPath", request.getContextPath());
                    }
@@ -271,11 +271,13 @@ public class SecurityConfig {
 
           @Override
           public Map<String, Object> getAuthUserExtraById(String authUserId) {
+              // 此处可以添加需要写入到token的额外属性
              Map<String, Object> extra = new HashMap<>();
              extra.put("cellphone", "13113026420");
              extra.put("telephone", "0755-1234567");
              extra.put("companyId", "uuid");
-             extra.put("manageGroupIds", Arrays.asList("uuid1", "uuid2"));
+             extra.put("departmentId", "uuid");
+             extra.put("hobbies", Arrays.asList("hobby1", "hobby2"));
              return extra;
           }
        };
@@ -309,7 +311,7 @@ public class SysUserController {
         logical = Logical.AND
     )
     public Result getList() {
-        return sysUserService.getList(sysUser, pageNum, pageSize);
+        return sysUserService.getList(dto, pageNum, pageSize);
     }
 }
 ```
@@ -337,10 +339,10 @@ logging.level.org.potato.security = DEBUG
 
 A sample data persistence tool.
 
-#### Example
+#### Example: use BaseDAO
 - Category.java
 ```java
-package com.cuckoo.project.common.entity;
+package com.cuckoo.project.common.domain.entity;
 
 public class Category {
 
@@ -352,7 +354,7 @@ public class Category {
 ```
 - ElectronicBook.java
 ```java
-package com.cuckoo.project.common.entity;
+package com.cuckoo.project.common.domain.entity;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
@@ -394,14 +396,6 @@ public interface ElectronicBookDAO extends BaseDAO<ElectronicBook> {
 ```java
 package com.cuckoo.project.common.dao;
 
-import com.cuckoo.project.common.entity.ElectronicBook;
-import org.potato.util.web.PageInfo;
-import org.springframework.jdbc.core.RowMapper;
-
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.Map;
-
 @Repository
 public class ElectronicBookDAOImpl extends BaseDAOImpl<ElectronicBook> implements ElectronicBookDAO {
     
@@ -437,99 +431,57 @@ public class ElectronicBookDAOImpl extends BaseDAOImpl<ElectronicBook> implement
 ```java
 package com.cuckoo.project.core.service.impl;
 
-import java.math.BigDecimal;
-import java.sql.Date;
-import java.sql.Timestamp;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Map;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.cuckoo.project.common.dao.ElectronicBookDAO;
-import com.cuckoo.project.common.dao.ElectronicBookDAOImpl;
-import com.cuckoo.project.common.entity.ElectronicBook;
-import org.potato.util.web.PageInfo;
-
 @Service
 public class ElectronicBookServiceImpl {
 
     @Autowired
     private ElectronicBookDAO electronicBookDAO;
 
-	public void insert() {
-		ElectronicBook electronicBook = new ElectronicBook();
-		electronicBook.setId("eb000010");
-		electronicBook.setName("天龙八部");
-		electronicBook.setAuthorName("桥峰");
-		electronicBook.setSize(1024);
-		electronicBook.setPrice1(new BigDecimal(104.52));
-		electronicBook.setPrice2(204.52);
-		electronicBook.setCreateDate(Date.valueOf(LocalDate.now()));
-		electronicBook.setCreateTime(Timestamp.valueOf(LocalDateTime.now()));
-		int affectedRowCount = electronicBookDAO.insert(electronicBook);
-		System.out.println("affectedRowCount: " + affectedRowCount);
-	}
-	
-	public void update() {
-		ElectronicBook dbElectronicBook = electronicBookDAO.findOne("eb000005");
-		if (dbElectronicBook != null) {
-			dbElectronicBook.setAuthorName("潘金莲");
-			int affectedRowCount = electronicBookDAO.update(dbElectronicBook);
-			System.out.println("affectedRowCount: " + affectedRowCount);
-		}
+	public void demo1() {
+		int affectedRows = electronicBookDAO.insert(electronicBook);
+        int affectedRows = electronicBookDAO.update(electronicBook);
+        int affectedRows = electronicBookDAO.updateSelective(electronicBook);
+        int affectedRows = electronicBookDAO.delete(id);
+        int affectedRows = electronicBookDAO.delete(ids);
+        ElectronicBook electronicBook = electronicBookDAO.findOne(id);
+        List<ElectronicBook> electronicBooks = electronicBookDAO.findAll();
 	}
 
-	public void updateSelective() {
-		ElectronicBook dbElectronicBook = electronicBookDAO.findOne("eb000004");
-		if (dbElectronicBook != null) {
-			dbElectronicBook.setAuthorName("孙悟空");
-			int affectedRowCount = electronicBookDAO.updateSelective(dbElectronicBook);
-			System.out.println("affectedRowCount: " + affectedRowCount);
-		}
-	}
-
-	public void delete() {
-		System.out.println("affectedRowCount: " + electronicBookDAO.delete("eb000001"));
-		System.out.println("affectedRowCount: " + electronicBookDAO.delete(new String[]{"eb000002", "eb000003"}));
-	}
-
-	public void findOne() {
-		System.out.println("-->" + electronicBookDAO.findOne("eb000010"));
-		System.out.println("-->" + electronicBookDAO.findOne("eb111111"));
-	}
-
-	public void findAll() {
-		List<ElectronicBook> electronicBooks = electronicBookDAO.findAll();
-		for (ElectronicBook electronicBook: electronicBooks) {
-			try {
-				System.out.println(new ObjectMapper().writeValueAsString(electronicBook));
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-		}
-	}
-
-	public void findList1() {
+	public void demo2() {
 		PageInfo<ElectronicBook> pageInfo = electronicBookDAO.findList1();
-		for (ElectronicBook electronicBook: pageInfo.getList()) {
-			try {
-				System.out.println(new ObjectMapper().writeValueAsString(electronicBook));
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-		}
+        PageInfo<Map<String, Object>> pageInfo = electronicBookDAO.findList2();
 	}
+}
+```
+#### Example: use BaseMapper
+- ElectronicBookMapper.java
+```java
+package com.cuckoo.project.common.mapper;
 
-	public void findList2() {
-		PageInfo<Map<String, Object>> pageInfo = electronicBookDAO.findList2();
-		for (Map<String, Object> row: pageInfo.getList()) {
-			try {
-				System.out.println(new ObjectMapper().writeValueAsString(row));
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-		}
+import com.cuckoo.project.common.domain.entity.ElectronicBook;
+
+@Mapper
+public interface ElectronicBookMapper extends BaseMapper<ElectronicBook> {
+
+}
+```
+- ElectronicBookServiceImpl.java
+```java
+package com.cuckoo.project.core.service.impl;
+
+@Service
+public class ElectronicBookServiceImpl {
+
+    @Autowired
+    private ElectronicBookMapper electronicBookMapper;
+
+	public void demo() {
+       int affectedRows = electronicBookMapper.insert(electronicBook);
+       int affectedRows = electronicBookMapper.insertBatch(electronicBooks);
+       int affectedRows = electronicBookMapper.update(electronicBook);
+       int affectedRows = electronicBookMapper.updateSelective(electronicBook);
+       int affectedRows = electronicBookMapper.delete(id);
+       int affectedRows = electronicBookMapper.deleteBatch(ids);
 	}
 }
 ```
